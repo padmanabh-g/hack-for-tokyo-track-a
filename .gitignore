@@ -7,9 +7,6 @@ __pycache__/
 # Env
 .env
 
-# Data (restricted mymizu dataset — do not commit)
-data/
-japan_taps_*.json
 
 # Next.js
 .next/
