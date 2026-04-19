@@ -1,17 +1,12 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
 import { cache } from 'react'
 import { filterTokyoStations, computeAnalysis } from './geo'
 import type { AnalysisResult } from './types'
+import mymizuRaw from '../data/mymizu.json'
 
 const WARD_GEO_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/tokyo.geojson'
 
 export const getAllData = cache(async (): Promise<AnalysisResult> => {
-  const mymizuPath = process.env.MYMIZU_DATA_PATH
-  if (!mymizuPath) throw new Error('MYMIZU_DATA_PATH not set')
-
-  const resolvedPath = resolve(process.cwd(), mymizuPath)
-  const rawData = JSON.parse(readFileSync(resolvedPath, 'utf-8'))
+  const rawData = mymizuRaw
   const stations = filterTokyoStations(rawData)
 
   const wardResp = await fetch(WARD_GEO_URL, { cache: 'no-store' })
