@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import { resolve } from 'path'
 import { cache } from 'react'
 import { filterTokyoStations, computeAnalysis } from './geo'
 import type { AnalysisResult } from './types'
@@ -9,7 +10,8 @@ export const getAllData = cache(async (): Promise<AnalysisResult> => {
   const mymizuPath = process.env.MYMIZU_DATA_PATH
   if (!mymizuPath) throw new Error('MYMIZU_DATA_PATH not set')
 
-  const rawData = JSON.parse(readFileSync(mymizuPath, 'utf-8'))
+  const resolvedPath = resolve(process.cwd(), mymizuPath)
+  const rawData = JSON.parse(readFileSync(resolvedPath, 'utf-8'))
   const stations = filterTokyoStations(rawData)
 
   const wardResp = await fetch(WARD_GEO_URL, { cache: 'no-store' })
