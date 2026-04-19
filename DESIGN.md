@@ -2,7 +2,7 @@
 
 **Direction:** Data-Serious with Mission Warmth
 
-The app lives in the intersection of civic data tool and environmental mission. The visual language should feel like a serious analytical dashboard that a city planner would trust, not a pastel eco startup.
+The app lives at the intersection of civic data tool and environmental mission. The visual language should feel like a serious analytical dashboard that a city planner would trust, not a pastel eco startup.
 
 ---
 
@@ -10,15 +10,16 @@ The app lives in the intersection of civic data tool and environmental mission. 
 
 | Role | Token | Hex |
 |------|-------|-----|
-| Background | `bg-base` | `#0A1628` |
-| Surface | `bg-surface` | `#112240` |
-| Border | `border-subtle` | `#1E3A5F` |
-| Body text | `text-primary` | `#E2E8F0` |
-| Muted text | `text-muted` | `#8BA3BC` |
+| Background | `bg-base` | `#111111` |
+| Surface | `bg-surface` | `#1C1C1C` |
+| Elevated | `bg-elevated` | `#161616` |
+| Border | `border-subtle` | `#2C2C2C` |
+| Body text | `text-primary` | `#EBEBEB` |
+| Muted text | `text-muted` | `#888888` |
 | Accent / CTA | `coral` | `#FF6B35` |
 | Impact numbers | `teal` | `#64FFDA` |
 
-The deep ocean navy (`#0A1628`) was chosen deliberately over typical eco greens. It communicates "serious analytical tool" first. The coral accent adds warmth and draws attention to actions. Teal for impact numbers creates a visual language: this number matters, it represents real world change.
+Neutral dark gray (`#111111`) communicates "serious analytical tool" while remaining softer than pure black. The coral accent adds warmth and draws attention to actions. Teal for impact numbers creates a visual language: this number matters, it represents real-world change.
 
 ---
 
@@ -27,10 +28,10 @@ The deep ocean navy (`#0A1628`) was chosen deliberately over typical eco greens.
 | Use | Font | Weight | Notes |
 |-----|------|--------|-------|
 | Display / headers | Space Grotesk | 700 | letter-spacing: -0.03em |
-| Body / UI | Plus Jakarta Sans | 400/500 | Clean, readable at small sizes |
-| Data / numbers | JetBrains Mono | 700 | All metric values, coordinates, scores |
+| Body / UI | Plus Jakarta Sans | 400/500/600 | Clean, readable at small sizes |
+| Data / numbers | JetBrains Mono | 400/500 | All metric values, coordinates, scores |
 
-Loading via Google Fonts in `_inject_styles()`.
+Loaded via Google Fonts in `app/globals.css`.
 
 ---
 
@@ -38,39 +39,54 @@ Loading via Google Fonts in `_inject_styles()`.
 
 **Metric hero block** — for impact numbers and key stats:
 ```
-background: #112240
-border: 1px solid #64FFDA33
+background: #161616
+border: 1px solid #2C2C2C
 border-radius: 8px
-label: uppercase, 0.75rem, #8BA3BC
-value: JetBrains Mono, 1.6rem, #64FFDA
+label: uppercase, 0.75rem, #888888
+value: JetBrains Mono, varies by importance, #64FFDA or #FF6B35
 ```
 
-**Recommendation cards** — for gap locations (via `st.info()`):
+**Recommendation cards** — for gap locations:
 ```
-background: #112240
-border-left: 3px solid #FF6B35
+background: #1C1C1C
+border: 1px solid #2C2C2C
+border-radius: 8px
 ```
 
-**Buttons** — coral fill, dark navy text, no rounded pill shape.
+**Combined impact block** — teal accent:
+```
+background: #1C1C1C
+border: 1px solid rgba(100, 255, 218, 0.2)
+border-radius: 8px
+```
+
+**Buttons** — coral fill, white text, 8px radius.
 
 ---
 
 ## Map Styling
 
-- Choropleth: `YlOrRd` (yellow-orange-red for desert severity — heat metaphor works)
-- Recommendation markers: orange circles with white number labels, 32px diameter
-- Station clusters: default blue MarkerCluster (intentional contrast — blue = water = refill)
-- Layer control: `collapsed=True` to reduce visual noise
+- Basemap: CartoDB Dark Matter GL (free, no API key)
+- Choropleth: YlOrRd gradient (yellow-orange-red for desert severity — heat metaphor)
+- Recommendation markers: coral circles with white number labels, 28px diameter
+- Station clusters: blue circles (`#0077B6`) — intentional contrast (blue = water = refill)
+- Ward hover: white fill at 0.1 opacity via feature-state API
+- Selected ward: coral fill + 3px coral border
 
 ---
 
-## Streamlit Theme (`.streamlit/config.toml`)
+## Layout
 
-```toml
-[theme]
-primaryColor = "#FF6B35"
-backgroundColor = "#0A1628"
-secondaryBackgroundColor = "#112240"
-textColor = "#E2E8F0"
-font = "sans serif"
-```
+- Header: `h-14`, `bg-surface`, `border-b border-subtle`
+- Map: flex-1, full height minus header + chat bar
+- Sidebar: `w-80 xl:w-96`, fixed right panel
+- Chat bar: `h-14`, translucent bottom bar with glass-morphism blur
+- Chat panel: absolutely positioned overlay, `max-w-2xl`, 55vh max height, glass backdrop
+
+---
+
+## Interaction States
+
+All interactive elements show `cursor-pointer`. Disabled states use `opacity-40` + `cursor-not-allowed`.
+
+Loading spinners: `border-t-teal` on dark `border-border-subtle` base.

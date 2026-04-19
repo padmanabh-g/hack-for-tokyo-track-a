@@ -12,7 +12,7 @@ export const getAllData = cache(async (): Promise<AnalysisResult> => {
   const rawData = JSON.parse(readFileSync(mymizuPath, 'utf-8'))
   const stations = filterTokyoStations(rawData)
 
-  const wardResp = await fetch(WARD_GEO_URL, { next: { revalidate: 86400 } })
+  const wardResp = await fetch(WARD_GEO_URL, { cache: 'no-store' })
   if (!wardResp.ok) throw new Error('Failed to fetch ward GeoJSON')
   const wardsRaw = await wardResp.json()
   // Filter to 23 special wards only

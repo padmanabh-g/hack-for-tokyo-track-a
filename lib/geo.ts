@@ -181,7 +181,9 @@ export function findGapLocations(
 }
 
 export function gapToBottles(gapM: number): number {
-  const catchmentPpl = Math.round(Math.PI * 0.3 ** 2 * 10000) // ~2827
-  const adoption = Math.min(0.07 + Math.max(gapM - 300, 0) / 10000, 0.15)
+  // Catchment scales with gap size: larger gap = more underserved people
+  const radiusKm = (gapM / 2) / 1000
+  const catchmentPpl = Math.round(Math.PI * radiusKm ** 2 * 6000) // 6000 ppl/km² Tokyo avg
+  const adoption = 0.05 // 5% of catchment switches to refill
   return Math.round(catchmentPpl * adoption * 2 * 250)
 }

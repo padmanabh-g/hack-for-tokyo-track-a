@@ -4,10 +4,21 @@ import { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { OverviewPanel } from './OverviewPanel'
 import { WardPanel } from './WardPanel'
+import { ChatBar } from './ChatBar'
 import { Droplets } from 'lucide-react'
 import type { AnalysisResult, GapLocation, WardProperties } from '@/lib/types'
 
-const Map = dynamic(() => import('./Map').then(m => m.Map), { ssr: false })
+const Map = dynamic(() => import('./Map').then(m => m.Map), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-bg-base">
+      <div className="flex flex-col items-center gap-3">
+        <span className="w-8 h-8 border-2 border-border-subtle border-t-teal rounded-full animate-spin" />
+        <span className="text-text-muted text-xs font-mono">Loading map…</span>
+      </div>
+    </div>
+  ),
+})
 
 export function MapView({ data }: { data: AnalysisResult }) {
   const [selectedWard, setSelectedWard] = useState<string | null>(null)
@@ -78,7 +89,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
     allSeverities.findIndex(w => w.name === wardName) + 1
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Header */}
       <header className="flex-none h-14 bg-bg-surface border-b border-border-subtle px-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
@@ -96,7 +107,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
             <span className="text-coral font-medium">{data.stats.worstWard}</span> worst desert
           </span>
           <span>
-            <span className="text-text-primary font-medium">23</span> wards scored
+            <span className="text-text-primary font-medium">23</span> wards
           </span>
         </div>
       </header>
@@ -139,6 +150,9 @@ export function MapView({ data }: { data: AnalysisResult }) {
           )}
         </aside>
       </div>
+
+      {/* Chat bar — floating bottom */}
+      <ChatBar wardContext={selectedWardProps ?? null} />
     </div>
   )
 }
