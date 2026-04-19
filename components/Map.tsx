@@ -290,14 +290,14 @@ export function Map({
             ?.setLngLat(e.lngLat)
             .setHTML(`
               <div style="font-family:'Plus Jakarta Sans',sans-serif;">
-                <div style="font-weight:600;font-size:14px;color:#E2E8F0;margin-bottom:6px;">${wardName}</div>
+                <div style="font-weight:600;font-size:14px;color:#EBEBEB;margin-bottom:6px;">${wardName}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;">
-                  <span style="color:#8BA3BC;font-size:12px;">Severity</span>
+                  <span style="color:#888888;font-size:12px;">Severity</span>
                   <span style="color:#FF6B35;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;">${typeof severityScore === 'number' ? severityScore.toFixed(0) : '—'}/100</span>
-                  <span style="color:#8BA3BC;font-size:12px;">Stations</span>
-                  <span style="color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12px;">${stationCount ?? '—'}</span>
-                  <span style="color:#8BA3BC;font-size:12px;">Waste</span>
-                  <span style="color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12px;">${typeof wastePerCapita === 'number' ? wastePerCapita.toFixed(1) : '—'} kg/cap</span>
+                  <span style="color:#888888;font-size:12px;">Stations</span>
+                  <span style="color:#EBEBEB;font-family:'JetBrains Mono',monospace;font-size:12px;">${stationCount ?? '—'}</span>
+                  <span style="color:#888888;font-size:12px;">Waste</span>
+                  <span style="color:#EBEBEB;font-family:'JetBrains Mono',monospace;font-size:12px;">${typeof wastePerCapita === 'number' ? wastePerCapita.toFixed(1) : '—'} kg/cap</span>
                 </div>
               </div>
             `)
@@ -408,13 +408,13 @@ export function Map({
           new maplibregl!.Popup({ offset: 16, closeButton: false }).setHTML(`
             <div style="font-family:'Plus Jakarta Sans',sans-serif;">
               <div style="font-weight:600;color:#FF6B35;margin-bottom:4px;">Recommended #${i + 1}</div>
-              <div style="color:#8BA3BC;font-size:12px;">${gap.lat.toFixed(4)}°N, ${gap.lng.toFixed(4)}°E</div>
+              <div style="color:#888888;font-size:12px;">${gap.lat.toFixed(4)}°N, ${gap.lng.toFixed(4)}°E</div>
               <div style="margin-top:4px;font-size:12px;">
-                <span style="color:#8BA3BC;">Gap:</span> <span style="color:#E2E8F0;font-family:'JetBrains Mono',monospace;">${gap.gap_m.toFixed(0)}m</span>
+                <span style="color:#888888;">Gap:</span> <span style="color:#EBEBEB;font-family:'JetBrains Mono',monospace;">${gap.gap_m.toFixed(0)}m</span>
               </div>
               <div style="font-size:12px;">
-                <span style="color:#8BA3BC;">Saves:</span> <span style="color:#64FFDA;font-family:'JetBrains Mono',monospace;">~${gap.bottles_per_year.toLocaleString()}</span>
-                <span style="color:#8BA3BC;"> bottles/yr</span>
+                <span style="color:#888888;">Saves:</span> <span style="color:#64FFDA;font-family:'JetBrains Mono',monospace;">~${gap.bottles_per_year.toLocaleString()}</span>
+                <span style="color:#888888;"> bottles/yr</span>
               </div>
             </div>
           `)
@@ -433,7 +433,7 @@ export function Map({
     <div
       ref={containerRef}
       className="w-full h-full"
-      style={{ background: '#0A1628' }}
+      style={{ background: '#111111' }}
     />
   )
 }

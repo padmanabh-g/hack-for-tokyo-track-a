@@ -10,16 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         bg: {
-          base: '#0A1628',
-          surface: '#112240',
-          elevated: '#0E1F38',
+          base: '#111111',
+          surface: '#1C1C1C',
+          elevated: '#161616',
         },
         border: {
-          subtle: '#1E3A5F',
+          subtle: '#2C2C2C',
         },
         text: {
-          primary: '#E2E8F0',
-          muted: '#8BA3BC',
+          primary: '#EBEBEB',
+          muted: '#888888',
         },
         coral: '#FF6B35',
         teal: '#64FFDA',

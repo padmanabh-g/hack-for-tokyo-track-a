@@ -4,10 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
 html, body {
   height: 100%;
-  background-color: #0A1628;
-  color: #E2E8F0;
+  background-color: #111111;
+  color: #EBEBEB;
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow: hidden;
 }
@@ -19,9 +22,9 @@ html, body {
 .maplibregl-ctrl-attrib { display: none; }
 .maplibregl-ctrl-logo { display: none !important; }
 .maplibregl-popup-content {
-  background: #112240 !important;
-  color: #E2E8F0 !important;
-  border: 1px solid #1E3A5F !important;
+  background: #1C1C1C !important;
+  color: #EBEBEB !important;
+  border: 1px solid #2C2C2C !important;
   border-radius: 8px !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 13px !important;
@@ -32,5 +35,5 @@ html, body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0A1628; }
-::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 2px; }
+::-webkit-scrollbar-track { background: #111111; }
+::-webkit-scrollbar-thumb { background: #2C2C2C; border-radius: 2px; }
