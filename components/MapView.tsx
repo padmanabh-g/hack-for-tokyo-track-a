@@ -95,7 +95,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
         <div className="flex items-center gap-3">
           <Droplets size={22} className="text-teal" strokeWidth={1.5} />
           <h1 className="font-display font-bold text-lg tracking-tight text-text-primary">
-            Tokyo Refill Desert Detector
+            NullIsland
           </h1>
         </div>
         <div className="hidden sm:flex items-center gap-6 text-sm text-text-muted font-mono">

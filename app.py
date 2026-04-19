@@ -1,5 +1,5 @@
 """
-Tokyo Refill Desert Detector
+NullIsland
 Students@AI Tokyo Hackathon 2026 — Track A (Zero Waste / mymizu)
 
 Cross-references plastic waste intensity with mymizu station coverage
@@ -71,7 +71,7 @@ def _severity_dot(rank: int) -> str:
 # ──────────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Tokyo Refill Desert Detector",
+    page_title="NullIsland",
     page_icon="💧",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -581,7 +581,7 @@ def main():
         <h1 style='margin-bottom:2px;font-family:Space Grotesk,sans-serif;
             font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;color:#E2E8F0;
             display:flex;align-items:center;'>
-            {droplet_svg}Tokyo Refill Desert Detector
+            {droplet_svg}NullIsland
         </h1>
         <p style='color:#8BA3BC;margin-top:4px;font-size:0.9rem;'>
         Cross-referencing plastic waste intensity with mymizu coverage to identify
@@ -766,7 +766,7 @@ def main():
             st.markdown(
                 f"<h2 style='font-family:Space Grotesk,sans-serif;font-size:1.2rem;"
                 f"font-weight:700;letter-spacing:-0.02em;color:#E2E8F0;margin-bottom:2px;"
-                f"display:flex;align-items:center;'>{flame_svg}Tokyo's Top Refill Deserts</h2>",
+                f"display:flex;align-items:center;'>{flame_svg}Top Refill Deserts</h2>",
                 unsafe_allow_html=True,
             )
             st.caption("High plastic waste + low mymizu coverage = dark red")

@@ -47,7 +47,7 @@ export function OverviewPanel({ wardsGeoJSON, stats, onWardClick, visibleWardNam
         <div className="flex items-center gap-2 mb-1">
           <Flame size={17} className="text-coral" strokeWidth={1.5} />
           <h2 className="font-display font-bold text-lg text-text-primary tracking-tight">
-            {isFiltered ? 'In View' : "Tokyo's Top Refill Deserts"}
+            {isFiltered ? 'In View' : "Top Refill Deserts"}
           </h2>
           {isFiltered && (
             <span className="ml-1 text-xs font-mono text-text-muted bg-bg-elevated border border-border-subtle rounded px-1.5 py-0.5">
@@ -70,7 +70,7 @@ export function OverviewPanel({ wardsGeoJSON, stats, onWardClick, visibleWardNam
           <button
             key={ward.ward_name}
             onClick={() => onWardClick(ward.ward_name)}
-            className="w-full text-left bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-coral/40 rounded-lg px-4 py-3 transition-all group"
+            className="w-full text-left cursor-pointer bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-coral/40 rounded-lg px-4 py-3 transition-all group"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">

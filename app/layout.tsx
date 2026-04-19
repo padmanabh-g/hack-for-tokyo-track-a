@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Tokyo Refill Desert Detector',
+  title: 'NullIsland',
   description: "AI-powered mymizu coverage gap analysis for Tokyo's 23 wards",
   icons: { icon: '💧' },
 }

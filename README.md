@@ -1,4 +1,4 @@
-# Tokyo Refill Desert Detector
+# NullIsland
 
 **Track A — Students@AI Tokyo Hackathon 2026**  
 Built for mymizu's expansion strategy.

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import type { WardProperties } from '@/lib/types'
 
-const SYSTEM = `You are a knowledgeable assistant for the Tokyo Refill Desert Detector — a tool that maps mymizu water refill station coverage gaps across Tokyo's 23 special wards.
+const SYSTEM = `You are a knowledgeable assistant for the NullIsland — a tool that maps mymizu water refill station coverage gaps across Tokyo's 23 special wards.
 
 Key facts you know:
 - mymizu is Japan's free water refill app connecting people to refill stations
