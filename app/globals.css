@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+  background-color: #0A1628;
+  color: #E2E8F0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
+}
+
+#__next, main { height: 100%; }
+
+/* MapLibre overrides */
+.maplibregl-map { font-family: 'Plus Jakarta Sans', sans-serif; }
+.maplibregl-ctrl-attrib { display: none; }
+.maplibregl-ctrl-logo { display: none !important; }
+.maplibregl-popup-content {
+  background: #112240 !important;
+  color: #E2E8F0 !important;
+  border: 1px solid #1E3A5F !important;
+  border-radius: 8px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  padding: 10px 14px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+}
+.maplibregl-popup-tip { display: none; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0A1628; }
+::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 2px; }

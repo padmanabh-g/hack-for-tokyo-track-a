@@ -1,9 +1,19 @@
-.env
+# Python
 .venv/
 __pycache__/
 *.pyc
-*.pyo
 .DS_Store
+
+# Env
+.env
+
+# Data (restricted mymizu dataset — do not commit)
 data/
-*.json
-!requirements*.txt
+japan_taps_*.json
+
+# Next.js
+.next/
+out/
+
+# Node
+node_modules/
