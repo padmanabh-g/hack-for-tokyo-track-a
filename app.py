@@ -27,6 +27,46 @@ except ImportError:
     pass
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Icon helpers (Lucide-style inline SVG — no CDN, no JS required)
+# ──────────────────────────────────────────────────────────────────────────────
+
+_ICON_PATHS = {
+    "droplet": '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.8-4-4-6.5c-.2 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    "map-pin": '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    "mouse-pointer": '<path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/>',
+    "circle-dot": '<circle cx="12" cy="12" r="10" fill="{fill}" stroke="none"/>',
+    "flame": '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    "bar-chart": '<line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>',
+    "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>',
+    "layers": '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+    "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+}
+
+
+def _icon(name: str, size: int = 16, color: str = "currentColor", fill: str = "none", extra: str = "") -> str:
+    path = _ICON_PATHS.get(name, "").replace("{fill}", fill)
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
+        f'viewBox="0 0 24 24" fill="{fill}" stroke="{color}" '
+        f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+        f'style="vertical-align:middle;{extra}">{path}</svg>'
+    )
+
+
+def _severity_dot(rank: int) -> str:
+    if rank <= 5:
+        color, label = "#FF6B35", "critical"
+    elif rank <= 12:
+        color, label = "#FFC107", "moderate"
+    else:
+        color, label = "#4ADE80", "good"
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" '
+        f'style="vertical-align:middle;margin-right:4px;">'
+        f'<circle cx="5" cy="5" r="5" fill="{color}"/></svg>'
+    )
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Configuration
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -515,6 +555,12 @@ def _inject_styles() -> None:
         /* Spinner text */
         [data-testid="stSpinner"] { color: #8BA3BC !important; }
 
+        /* SVG icons in markdown */
+        svg { display: inline-block; flex-shrink: 0; }
+
+        /* Material icon buttons */
+        .stButton > button [data-testid="stIconMaterial"] { opacity: 0.9; }
+
         /* Warning */
         [data-testid="stAlert"][kind="warning"] {
             border-left: 3px solid #FF6B35 !important;
@@ -529,11 +575,13 @@ def main():
     _inject_styles()
 
     # Header
+    droplet_svg = _icon("droplet", size=28, color="#64FFDA", fill="#64FFDA22", extra="margin-right:10px;position:relative;top:-2px;")
     st.markdown(
-        """
+        f"""
         <h1 style='margin-bottom:2px;font-family:Space Grotesk,sans-serif;
-            font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;color:#E2E8F0;'>
-            💧 Tokyo Refill Desert Detector
+            font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;color:#E2E8F0;
+            display:flex;align-items:center;'>
+            {droplet_svg}Tokyo Refill Desert Detector
         </h1>
         <p style='color:#8BA3BC;margin-top:4px;font-size:0.9rem;'>
         Cross-referencing plastic waste intensity with mymizu coverage to identify
@@ -576,10 +624,12 @@ def main():
     col_map, col_detail = st.columns([3, 1], gap="medium")
 
     with col_map:
+        cursor_svg = _icon("mouse-pointer", size=13, color="#8BA3BC", extra="margin-right:3px;position:relative;top:-1px;")
         st.markdown(
             f"**{len(stations):,} mymizu stations** in Tokyo · "
             f"**23 wards** scored by plastic waste + coverage gap · "
-            f"_Click any ward for AI analysis_"
+            f"<span style='color:#8BA3BC;font-style:italic;'>{cursor_svg}Click any ward for AI analysis</span>",
+            unsafe_allow_html=True,
         )
 
         current_gaps = st.session_state.gap_locations.get(st.session_state.selected_ward)
@@ -617,13 +667,23 @@ def main():
             ward = wards[wards["ward_name"] == st.session_state.selected_ward].iloc[0]
             gaps = st.session_state.gap_locations.get(ward["ward_name"], [])
 
-            st.markdown(f"## 📍 {ward['ward_name']}")
+            pin_svg = _icon("map-pin", size=18, color="#FF6B35", extra="margin-right:6px;position:relative;top:-2px;")
+            st.markdown(
+                f"<h2 style='font-family:Space Grotesk,sans-serif;font-size:1.3rem;"
+                f"font-weight:700;letter-spacing:-0.02em;color:#E2E8F0;margin-bottom:4px;"
+                f"display:flex;align-items:center;'>{pin_svg}{ward['ward_name']}</h2>",
+                unsafe_allow_html=True,
+            )
 
             # Rank among 23 wards
             rank = wards["desert_severity"].rank(ascending=False).loc[ward.name]
-            severity_color = "🔴" if rank <= 5 else "🟡" if rank <= 12 else "🟢"
+            dot = _severity_dot(int(rank))
+            label = "critical" if rank <= 5 else "moderate" if rank <= 12 else "good"
             st.markdown(
-                f"{severity_color} **#{int(rank)} worst** of 23 wards"
+                f"<span style='font-size:0.85rem;color:#8BA3BC;'>"
+                f"{dot}<strong style='color:#E2E8F0;'>#{int(rank)} worst</strong> of 23 wards "
+                f"<span style='color:#8BA3BC;'>· {label}</span></span>",
+                unsafe_allow_html=True,
             )
 
             ca, cb = st.columns(2)
@@ -638,7 +698,13 @@ def main():
             if gaps:
                 total_bottles = sum(gap_to_bottles(g[2]) for g in gaps)
                 st.divider()
-                st.markdown("**Recommended new station locations:**")
+                layers_svg = _icon("layers", size=14, color="#8BA3BC", extra="margin-right:5px;position:relative;top:-1px;")
+                st.markdown(
+                    f"<span style='font-size:0.8rem;font-weight:600;color:#8BA3BC;"
+                    f"text-transform:uppercase;letter-spacing:0.07em;'>"
+                    f"{layers_svg}Recommended new station locations</span>",
+                    unsafe_allow_html=True,
+                )
                 for i, (lat, lng, gap_m) in enumerate(gaps, 1):
                     bottles = gap_to_bottles(gap_m)
                     st.markdown(
@@ -668,14 +734,14 @@ def main():
             if ward_name in st.session_state.claude_briefs:
                 st.markdown("**AI Intervention Brief:**")
                 st.info(st.session_state.claude_briefs[ward_name])
-                if st.button("🔄 Regenerate", key="regen"):
+                if st.button("Regenerate", icon=":material/refresh:", key="regen"):
                     del st.session_state.claude_briefs[ward_name]
                     st.rerun()
             else:
                 if not os.getenv("ANTHROPIC_API_KEY"):
                     st.warning("Add `ANTHROPIC_API_KEY` to `.env` to enable AI briefs.")
                 else:
-                    if st.button("✨ Generate AI Brief", type="primary", key="gen_brief"):
+                    if st.button("Generate AI Brief", icon=":material/auto_awesome:", type="primary", key="gen_brief"):
                         with st.spinner("Asking Claude..."):
                             ward_data = {
                                 "ward_name": ward_name,
@@ -690,13 +756,19 @@ def main():
                         st.session_state.claude_briefs[ward_name] = brief
                         st.rerun()
 
-            if st.button("← Back to overview", key="back"):
+            if st.button("Overview", icon=":material/arrow_back:", key="back"):
                 st.session_state.selected_ward = None
                 st.rerun()
 
         else:
             # Overview panel
-            st.markdown("## Tokyo's Top Refill Deserts")
+            flame_svg = _icon("flame", size=16, color="#FF6B35", extra="margin-right:6px;position:relative;top:-2px;")
+            st.markdown(
+                f"<h2 style='font-family:Space Grotesk,sans-serif;font-size:1.2rem;"
+                f"font-weight:700;letter-spacing:-0.02em;color:#E2E8F0;margin-bottom:2px;"
+                f"display:flex;align-items:center;'>{flame_svg}Tokyo's Top Refill Deserts</h2>",
+                unsafe_allow_html=True,
+            )
             st.caption("High plastic waste + low mymizu coverage = dark red")
 
             for i, (_, row) in enumerate(top5.iterrows(), 1):
@@ -709,11 +781,21 @@ def main():
                     )
                 st.divider()
 
-            st.caption("👆 Click any ward on the map for detailed analysis + AI brief")
+            cursor2_svg = _icon("mouse-pointer", size=13, color="#8BA3BC", extra="margin-right:4px;position:relative;top:-1px;")
+            st.markdown(
+                f"<span style='font-size:0.8rem;color:#8BA3BC;'>{cursor2_svg}"
+                f"Click any ward on the map for detailed analysis + AI brief</span>",
+                unsafe_allow_html=True,
+            )
 
             # Summary stats
             st.markdown("---")
-            st.markdown("**Dataset summary:**")
+            db_svg = _icon("database", size=13, color="#8BA3BC", extra="margin-right:5px;position:relative;top:-1px;")
+            st.markdown(
+                f"<span style='font-size:0.8rem;font-weight:600;color:#8BA3BC;"
+                f"text-transform:uppercase;letter-spacing:0.07em;'>{db_svg}Dataset</span>",
+                unsafe_allow_html=True,
+            )
             st.markdown(
                 f"- {len(stations):,} mymizu stations in Tokyo\n"
                 f"- Worst ward: **{top5.iloc[0]['ward_name']}** "
