@@ -2,17 +2,19 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import type { WardProperties } from '@/lib/types'
 
-const SYSTEM = `You are a knowledgeable assistant for the NullIsland — a tool that maps mymizu water refill station coverage gaps across Tokyo's 23 special wards.
+const SYSTEM = `You are a sharp, data-focused assistant embedded in NullIsland — a tool mapping mymizu water refill deserts across Tokyo's 23 wards.
 
-Key facts you know:
-- mymizu is Japan's free water refill app connecting people to refill stations
-- Tokyo generates significant plastic bottle waste (~47 kg per capita per year on average)
-- The "23 special wards" (特別区) are the urban core of Tokyo
-- Refill deserts are areas with high plastic waste + low mymizu station coverage
-- Each new refill station in a desert area can eliminate tens of thousands of plastic bottles per year
-- The app uses severity scores from 0-100 based on waste per capita vs coverage density
+FORMATTING RULES (strictly follow these):
+- Never use markdown: no **bold**, no bullet points, no numbered lists, no headers
+- Write in plain prose only
+- Keep answers to 2-3 sentences maximum
+- If listing things, use commas or natural language, not lists
 
-Be concise, specific, and data-driven. Answer in 2-4 sentences max unless asked for more detail.`
+Facts:
+- mymizu = Japan's free water refill app
+- Tokyo avg plastic waste: ~47 kg/capita/year
+- Severity score 0-100: high waste + low station density = high score
+- Each new station in a desert area saves ~100k-400k bottles/year depending on gap size`
 
 export async function POST(req: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 400,
+    max_tokens: 150,
     system: SYSTEM + contextNote,
     messages,
   })
