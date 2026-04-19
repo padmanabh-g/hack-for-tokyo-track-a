@@ -408,7 +408,7 @@ def build_map(
                 popup=f"Recommended location #{i+1}<br>{lat:.4f}°N, {lng:.4f}°E<br>Gap: {gap_m:.0f}m",
             ).add_to(m)
 
-    folium.LayerControl(collapsed=False).add_to(m)
+    folium.LayerControl(collapsed=True).add_to(m)
     return m
 
 
@@ -416,14 +416,128 @@ def build_map(
 # Main UI
 # ──────────────────────────────────────────────────────────────────────────────
 
+def _inject_styles() -> None:
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        /* Base */
+        html, body, [data-testid="stApp"] {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        /* Headings — Space Grotesk */
+        h1, h2, h3, h4,
+        [data-testid="stMarkdownContainer"] h1,
+        [data-testid="stMarkdownContainer"] h2,
+        [data-testid="stMarkdownContainer"] h3 {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        /* Metric values — monospace, teal */
+        [data-testid="stMetricValue"] {
+            font-family: 'JetBrains Mono', monospace !important;
+            color: #64FFDA !important;
+            font-size: 1.3rem !important;
+            font-weight: 500 !important;
+        }
+        [data-testid="stMetricLabel"] {
+            color: #8BA3BC !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+        }
+        [data-testid="stMetricDelta"] { display: none; }
+
+        /* Metric container borders */
+        [data-testid="stMetricContainer"],
+        div[data-testid="metric-container"] {
+            border: 1px solid #1E3A5F !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            background: #0E1F38 !important;
+        }
+
+        /* Primary button — coral */
+        .stButton > button[kind="primary"] {
+            background: #FF6B35 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 6px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.01em !important;
+        }
+        .stButton > button[kind="primary"]:hover {
+            background: #E55A25 !important;
+            transform: translateY(-1px);
+        }
+
+        /* Secondary buttons */
+        .stButton > button:not([kind="primary"]) {
+            background: transparent !important;
+            color: #8BA3BC !important;
+            border: 1px solid #1E3A5F !important;
+            border-radius: 6px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        .stButton > button:not([kind="primary"]):hover {
+            border-color: #FF6B35 !important;
+            color: #E2E8F0 !important;
+        }
+
+        /* Info box (Claude brief) — teal left border */
+        [data-testid="stAlert"][data-baseweb="notification"] {
+            background: #0D1F35 !important;
+            border-left: 3px solid #64FFDA !important;
+            border-radius: 0 6px 6px 0 !important;
+        }
+
+        /* Divider */
+        hr { border-color: #1E3A5F !important; opacity: 1 !important; }
+
+        /* Caption */
+        [data-testid="stCaptionContainer"],
+        small { color: #8BA3BC !important; }
+
+        /* Code / inline code */
+        code {
+            font-family: 'JetBrains Mono', monospace !important;
+            background: #0E1F38 !important;
+            color: #64FFDA !important;
+            border-radius: 3px !important;
+            padding: 1px 5px !important;
+            font-size: 0.85em !important;
+        }
+
+        /* Spinner text */
+        [data-testid="stSpinner"] { color: #8BA3BC !important; }
+
+        /* Warning */
+        [data-testid="stAlert"][kind="warning"] {
+            border-left: 3px solid #FF6B35 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main():
+    _inject_styles()
+
     # Header
     st.markdown(
         """
-        <h1 style='margin-bottom:0'>💧 Tokyo Refill Desert Detector</h1>
-        <p style='color:#666;margin-top:4px'>
-        AI-powered map identifying where Tokyo's plastic waste is worst and refill coverage is lowest.
-        Built for mymizu's expansion strategy.
+        <h1 style='margin-bottom:2px;font-family:Space Grotesk,sans-serif;
+            font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;color:#E2E8F0;'>
+            💧 Tokyo Refill Desert Detector
+        </h1>
+        <p style='color:#8BA3BC;margin-top:4px;font-size:0.9rem;'>
+        Cross-referencing plastic waste intensity with mymizu coverage to identify
+        where Tokyo needs refill infrastructure most.
         </p>
         """,
         unsafe_allow_html=True,
@@ -531,7 +645,21 @@ def main():
                         f"**{i}.** `{lat:.4f}°N {lng:.4f}°E`  \n"
                         f"↳ {gap_m:.0f}m gap · {bottles:,} bottles/yr saved"
                     )
-                st.success(f"**Combined impact: ~{total_bottles:,} plastic bottles/year**")
+                st.markdown(
+                    f"""<div style='background:#112240;border:1px solid #64FFDA33;
+                        border-radius:8px;padding:16px 20px;margin:12px 0;'>
+                        <div style='color:#8BA3BC;font-size:0.75rem;letter-spacing:0.08em;
+                            text-transform:uppercase;margin-bottom:4px;'>Combined Annual Impact</div>
+                        <div style='font-family:JetBrains Mono,monospace;color:#64FFDA;
+                            font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;'>
+                            ~{total_bottles:,}
+                        </div>
+                        <div style='color:#8BA3BC;font-size:0.8rem;margin-top:2px;'>
+                            plastic bottles eliminated per year
+                        </div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
 
             # Claude brief
             st.divider()
