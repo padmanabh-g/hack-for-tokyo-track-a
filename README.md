@@ -3,45 +3,49 @@
 **Track A — Students@AI Tokyo Hackathon 2026**  
 Built for mymizu's expansion strategy.
 
+Live: **https://null-island.vercel.app**
+
 ---
 
 ## What It Does
 
-An AI-powered Streamlit web app that cross-references Tokyo's plastic waste intensity with mymizu station coverage to identify **refill deserts** — wards where plastic waste is high but refill infrastructure is missing.
+A full-stack AI web app that cross-references Tokyo's plastic waste intensity with mymizu station coverage to identify **refill deserts** — wards where plastic waste is high but refill infrastructure is absent.
 
-Click any ward on the interactive map to get:
-- Desert severity score (waste intensity vs. station coverage)
-- Top 3 recommended new station locations (based on coverage gap analysis)
-- Claude-generated intervention brief with projected plastic bottle reduction
+Click any ward on the interactive choropleth map to get:
+- Desert severity score (0–100, waste intensity vs. station density)
+- Top 3 recommended new station locations based on maximum coverage gap
+- AI-generated intervention brief with projected annual plastic bottle reduction
+- Live chat assistant for any question about Tokyo's refill situation
 
 ## Key Finding
 
 mymizu's network is concentrated in high-footfall commercial areas (Shibuya, Shinjuku, Chuo). The real deserts are outer residential wards — **Adachi, Katsushika, Edogawa** — where 500K+ residents have almost no refill access. Adding 3 stations in Adachi alone could eliminate ~636,000 plastic bottles per year.
 
-## Setup
+## Stack
+
+- **Next.js 15** (App Router, server components)
+- **MapLibre GL JS** — WebGL choropleth map with live viewport sync
+- **@turf/turf** — spatial joins, gap analysis (40×40 grid per ward)
+- **Anthropic Claude** — ward AI briefs + chat assistant
+- **Tailwind CSS** — design system
+- **Vercel** — deployment
+
+## Run Locally
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+npm install
 ```
 
-Create a `.env` file:
+Create `.env`:
 ```
 ANTHROPIC_API_KEY=your_key_here
-MYMIZU_DATA_PATH=/path/to/japan_taps_20260416_144839.json
 ```
-
-> **Data note:** The mymizu dataset is restricted — do not commit it to this repo.  
-> Access via: https://drive.google.com/drive/folders/12r3XS2K1VX_MTyWVJ6OR_5IsgDQRdu7A
-
-## Run
 
 ```bash
-streamlit run app.py
+npm run dev
 ```
 
-Then open http://localhost:8501
+Open http://localhost:3000
 
 ## How the Score Works
 
@@ -50,28 +54,24 @@ desert_severity = waste_per_capita / (stations_per_km² + 0.01)
 ```
 
 Higher waste + fewer stations per km² = higher severity (darker red on map).  
-Scores are normalized to [0, 100] across all 23 wards for the choropleth.
+Scores are normalized to [0, 100] across all 23 wards.
 
-## Recommended Locations Algorithm
+## Gap Analysis Algorithm
 
-For each ward, the app:
-1. Samples a 40×40 grid of candidate points within the ward polygon
-2. For each candidate, computes distance to the nearest existing mymizu station
-3. Returns the top 3 candidates with maximum gap (minimum coverage), spaced ≥350m apart
-
-## Tech Stack
-
-- **Streamlit** — web app
-- **GeoPandas + Shapely** — spatial joins, polygon analysis
-- **Folium + streamlit-folium** — interactive choropleth map
-- **Anthropic Claude Sonnet** — ward intervention briefs
-- **mymizu open dataset** — 11,769 Japan refill stations
-- **dataofjapan/land** — Tokyo 23-ward GeoJSON boundaries
+For each selected ward:
+1. Sample a 40×40 grid of candidate points within the ward polygon
+2. For each candidate, compute distance to the nearest existing mymizu station
+3. Return the top 3 candidates with maximum gap, spaced ≥350m apart
+4. Estimate annual bottles saved: `π × (gap/2)² × 6000 ppl/km² × 5% adoption × 500 uses/yr`
 
 ## Data Sources
 
 | Dataset | Source |
 |---------|--------|
-| mymizu stations | Google Drive (restricted) |
+| mymizu stations (3,224 in Tokyo) | mymizu open dataset |
 | Tokyo ward boundaries | github.com/dataofjapan/land |
-| Ward waste estimates | Ministry of Environment FY2023 + TMG Open Data (calibrated) |
+| Ward waste per capita | Ministry of Environment FY2023 + TMG Open Data |
+
+## Repo
+
+https://github.com/padmanabh-g/hack-for-tokyo-track-a
