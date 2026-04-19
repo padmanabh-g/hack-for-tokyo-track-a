@@ -1,801 +1,711 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>NullIsland — Pitch Deck</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #111111;
-    --surface: #1C1C1C;
-    --elevated: #161616;
-    --border: #2C2C2C;
-    --text: #EBEBEB;
-    --muted: #888888;
-    --coral: #FF6B35;
-    --teal: #64FFDA;
-  }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    overflow: hidden;
-  }
-  .slide {
-    width: 100vw;
-    height: 100vh;
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 0; left: 0;
-  }
-  .slide.active { display: flex; }
-  .font-display { font-family: 'Space Grotesk', sans-serif; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; }
-  .text-coral { color: var(--coral); }
-  .text-teal { color: var(--teal); }
-  .text-muted { color: var(--muted); }
-  .border-subtle { border-color: var(--border); }
-  .bg-surface { background: var(--surface); }
-  .bg-elevated { background: var(--elevated); }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--surface:#181818;--elevated:#141414;--border:#252525;
+  --text:#f0f0f0;--muted:#707070;--coral:#FF4D1C;--teal:#00FFB2;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif}
+#stage{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  will-change:transform,opacity,clip-path,filter;
+}
+.slide.active{display:flex}
+.font-display{font-family:'Space Grotesk',sans-serif}
+.font-mono{font-family:'JetBrains Mono',monospace}
 
-  .gradient-bar {
-    height: 8px;
-    border-radius: 4px;
-    background: linear-gradient(to right, #ffffb2, #fecc5c, #fd8d3c, #f03b20, #bd0026);
-  }
+/* ── Overlays ────────────────────────────────────── */
+#flash{position:fixed;inset:0;pointer-events:none;z-index:999;opacity:0;background:#fff}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.7) 100%)}
+#scan-line{position:fixed;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(0,255,178,0.6),transparent);pointer-events:none;z-index:998;top:-4px;opacity:0}
+#progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(to right,var(--teal),var(--coral));z-index:1000;width:0%;transition:none}
+#noise{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-size:128px}
 
-  #nav-dots {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    z-index: 100;
-  }
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--border);
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .dot.active { background: var(--coral); transform: scale(1.4); }
+/* ── BG canvas ───────────────────────────────────── */
+#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:1}
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:500}
 
-  #slide-counter {
-    position: fixed;
-    bottom: 24px;
-    right: 32px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    z-index: 100;
-  }
+/* ── Nav ─────────────────────────────────────────── */
+#nav-dots{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:200}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.25s}
+.dot.active{background:var(--coral);transform:scale(1.6)}
+#slide-counter{position:fixed;bottom:26px;right:36px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);z-index:200;letter-spacing:0.06em}
+#key-hint{position:fixed;bottom:26px;left:36px;font-size:11px;color:var(--muted);z-index:200}
 
-  #key-hint {
-    position: fixed;
-    bottom: 24px;
-    left: 32px;
-    font-size: 11px;
-    color: var(--muted);
-    z-index: 100;
-  }
+/* ── Cards ───────────────────────────────────────── */
+.stat-card{background:var(--elevated);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
+.ward-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.qr-card{background:#fff;border-radius:12px;padding:12px;display:inline-flex;align-items:center;justify-content:center}
+.highlight{border-left:3px solid var(--teal);background:rgba(0,255,178,0.04);border-radius:0 8px 8px 0;padding:12px 16px}
+.highlight-coral{border-left:3px solid var(--coral);background:rgba(255,77,28,0.06);border-radius:0 8px 8px 0;padding:12px 16px}
+.gradient-bar{height:8px;border-radius:4px;background:linear-gradient(to right,#ffffb2,#fecc5c,#fd8d3c,#f03b20,#bd0026)}
+.step-row{display:flex;align-items:center;gap:20px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;opacity:0;transform:translateX(40px)}
+.stack-card{display:flex;align-items:center;gap:16px;background:var(--elevated);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
 
-  .stat-card {
-    background: var(--elevated);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 24px;
-  }
-
-  .ward-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-
-  .qr-card {
-    background: white;
-    border-radius: 12px;
-    padding: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .highlight {
-    border-left: 3px solid var(--teal);
-    background: rgba(100, 255, 218, 0.05);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-  }
-  .highlight-coral {
-    border-left: 3px solid var(--coral);
-    background: rgba(255, 107, 53, 0.06);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-  }
-
-  /* Confetti canvas */
-  #confetti-canvas {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 200;
-  }
+/* ── Glow ────────────────────────────────────────── */
+.glow-teal{box-shadow:0 0 40px rgba(0,255,178,0.1)}
+.glow-coral{box-shadow:0 0 40px rgba(255,77,28,0.12)}
 </style>
 </head>
 <body>
+<div id="stage">
 
+<!-- overlays -->
+<canvas id="bg-canvas"></canvas>
 <canvas id="confetti-canvas"></canvas>
+<div id="flash"></div>
+<div id="vignette"></div>
+<div id="scan-line"></div>
+<div id="noise"></div>
+<div id="progress"></div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 1 — TITLE
-═══════════════════════════════════════════════════ -->
-<div class="slide active" id="slide-1">
-  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; padding:60px;">
+<!-- ══════════════════════ SLIDE 1 — TITLE ══════════════════════ -->
+<div class="slide active" id="slide-1" style="align-items:center;justify-content:center;background:var(--bg)">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(0,255,178,0.07) 0%,transparent 70%)"></div>
 
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div style="width:56px;height:56px;background:rgba(100,255,218,0.12);border:1.5px solid var(--teal);border-radius:14px;display:flex;align-items:center;justify-content:center;">
-        <i data-lucide="droplets" style="width:28px;height:28px;color:var(--teal);stroke-width:1.5;"></i>
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:28px;padding:60px;text-align:center">
+    <div style="display:flex;align-items:center;gap:18px" id="s1-logo">
+      <div style="width:60px;height:60px;background:rgba(0,255,178,0.1);border:1.5px solid var(--teal);border-radius:16px;display:flex;align-items:center;justify-content:center">
+        <i data-lucide="droplets" style="width:30px;height:30px;color:var(--teal);stroke-width:1.5"></i>
       </div>
-      <h1 class="font-display" style="font-size:52px;font-weight:700;letter-spacing:-0.04em;color:var(--text);">NullIsland</h1>
+      <h1 id="s1-title" class="font-display" style="font-size:58px;font-weight:800;letter-spacing:-0.05em">NullIsland</h1>
     </div>
 
-    <p style="font-size:20px;color:var(--muted);max-width:560px;text-align:center;line-height:1.6;">
-      AI-powered refill desert detection for Tokyo —<br/>
-      finding where mymizu needs to go next.
+    <p id="s1-sub" style="font-size:20px;color:var(--muted);max-width:520px;line-height:1.65">
+      AI-powered refill desert detection for Tokyo —<br/>finding where mymizu needs to go next.
     </p>
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-      <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--muted);">Students@AI Tokyo 2026</span>
-      <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--muted);">Track A — Zero Waste</span>
-      <span style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--coral);">mymizu Challenge</span>
+    <div id="s1-tags" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--muted)">Students@AI Tokyo 2026</span>
+      <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--muted)">Track A — Zero Waste</span>
+      <span style="background:rgba(255,77,28,0.1);border:1px solid rgba(255,77,28,0.3);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--coral)">mymizu Challenge</span>
     </div>
 
-    <div style="position:absolute;bottom:60px;display:flex;gap:6px;align-items:center;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);">null-island.vercel.app</span>
+    <div id="s1-url" style="position:absolute;bottom:-40px">
+      <span class="font-mono" style="font-size:12px;color:var(--muted)">null-island.vercel.app</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 2 — THE PROBLEM
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-2">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:40px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 2 — PROBLEM ══════════════════════ -->
+<div class="slide" id="slide-2" style="background:var(--bg)">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(255,77,28,0.08) 0%,transparent 70%)"></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%;position:relative">
 
-    <div>
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--coral);text-transform:uppercase;margin-bottom:12px;">The Problem</p>
-      <h2 class="font-display" style="font-size:44px;font-weight:700;letter-spacing:-0.03em;line-height:1.1;">
+    <div id="s2-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--coral);text-transform:uppercase;margin-bottom:14px">The Problem</p>
+      <h2 class="font-display" style="font-size:46px;font-weight:800;letter-spacing:-0.04em;line-height:1.08">
         Tokyo has 3,224 mymizu stations.<br/>
-        <span style="color:var(--coral);">Coverage doesn't match where people live.</span>
+        <span style="color:var(--coral)">Coverage doesn't match where people live.</span>
       </h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div id="s2-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div class="highlight">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">Where stations are concentrated</p>
-        <p style="font-size:17px;font-weight:600;">Shibuya · Shinjuku · Chuo</p>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Tourist & commercial zones — already served</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:4px">Where stations are concentrated</p>
+        <p style="font-size:16px;font-weight:600">Shibuya · Shinjuku · Chuo</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">Tourist & commercial zones — already served</p>
       </div>
       <div class="highlight-coral">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">Where residents are underserved</p>
-        <p style="font-size:17px;font-weight:600;color:var(--coral);">Adachi · Katsushika · Edogawa</p>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">500K+ residents, almost no refill access</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:4px">Where residents are underserved</p>
+        <p style="font-size:16px;font-weight:600;color:var(--coral)">Adachi · Katsushika · Edogawa</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">500K+ residents, almost no refill access</p>
       </div>
     </div>
 
-    <div style="display:flex;gap:32px;">
+    <div id="s2-stats" style="display:flex;gap:32px;align-items:flex-end">
       <div>
-        <p class="font-mono" style="font-size:36px;font-weight:500;color:var(--coral);">51.2 kg</p>
-        <p style="font-size:13px;color:var(--muted);">plastic waste / capita / yr in Adachi</p>
+        <p class="font-mono" style="font-size:38px;font-weight:500;color:var(--coral)"><span id="s2-n1">0</span> kg</p>
+        <p style="font-size:12px;color:var(--muted)">plastic waste / capita / yr in Adachi</p>
       </div>
-      <div style="width:1px;background:var(--border);"></div>
+      <div style="width:1px;background:var(--border);height:48px"></div>
       <div>
-        <p class="font-mono" style="font-size:36px;font-weight:500;color:var(--teal);">1.31</p>
-        <p style="font-size:13px;color:var(--muted);">mymizu stations per km² (vs 4.88 avg)</p>
+        <p class="font-mono" style="font-size:38px;font-weight:500;color:var(--teal)"><span id="s2-n2">0</span></p>
+        <p style="font-size:12px;color:var(--muted)">mymizu stations per km² (vs 4.88 avg)</p>
       </div>
-      <div style="width:1px;background:var(--border);"></div>
+      <div style="width:1px;background:var(--border);height:48px"></div>
       <div>
-        <p class="font-mono" style="font-size:36px;font-weight:500;">100/100</p>
-        <p style="font-size:13px;color:var(--muted);">severity score — worst of 23 wards</p>
+        <p class="font-mono" style="font-size:38px;font-weight:500"><span id="s2-n3">0</span>/100</p>
+        <p style="font-size:12px;color:var(--muted)">severity score — worst of 23 wards</p>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 3 — THE SOLUTION
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-3">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 3 — SOLUTION ══════════════════════ -->
+<div class="slide" id="slide-3" style="background:var(--bg)">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 80% 40%,rgba(0,255,178,0.07) 0%,transparent 70%)"></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%;position:relative">
 
-    <div>
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--teal);text-transform:uppercase;margin-bottom:12px;">The Solution</p>
-      <h2 class="font-display" style="font-size:44px;font-weight:700;letter-spacing:-0.03em;line-height:1.1;">
+    <div id="s3-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--teal);text-transform:uppercase;margin-bottom:14px">The Solution</p>
+      <h2 class="font-display" style="font-size:46px;font-weight:800;letter-spacing:-0.04em;line-height:1.08">
         We show mymizu exactly<br/>
-        <span style="color:var(--teal);">where to expand next.</span>
+        <span style="color:var(--teal)">where to expand next.</span>
       </h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-
-      <div class="stat-card" style="display:flex;flex-direction:column;gap:12px;">
-        <div style="width:40px;height:40px;background:rgba(100,255,218,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-          <i data-lucide="map" style="width:20px;height:20px;color:var(--teal);stroke-width:1.5;"></i>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div class="stat-card s3-card" style="display:flex;flex-direction:column;gap:12px">
+        <div style="width:42px;height:42px;background:rgba(0,255,178,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <i data-lucide="map" style="width:20px;height:20px;color:var(--teal);stroke-width:1.5"></i>
         </div>
-        <div>
-          <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Choropleth Map</p>
-          <p style="font-size:13px;color:var(--muted);line-height:1.5;">23 wards colored by desert severity — waste intensity vs refill coverage.</p>
-        </div>
+        <p style="font-size:15px;font-weight:700">Choropleth Map</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.55">23 wards colored by desert severity — waste intensity vs refill coverage.</p>
       </div>
-
-      <div class="stat-card" style="display:flex;flex-direction:column;gap:12px;">
-        <div style="width:40px;height:40px;background:rgba(255,107,53,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-          <i data-lucide="crosshair" style="width:20px;height:20px;color:var(--coral);stroke-width:1.5;"></i>
+      <div class="stat-card s3-card" style="display:flex;flex-direction:column;gap:12px">
+        <div style="width:42px;height:42px;background:rgba(255,77,28,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <i data-lucide="crosshair" style="width:20px;height:20px;color:var(--coral);stroke-width:1.5"></i>
         </div>
-        <div>
-          <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Gap Analysis</p>
-          <p style="font-size:13px;color:var(--muted);line-height:1.5;">40×40 grid per ward. Finds the 3 spots with maximum distance to existing stations.</p>
-        </div>
+        <p style="font-size:15px;font-weight:700">Gap Analysis</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.55">40×40 grid per ward. Finds 3 spots with maximum distance to existing stations.</p>
       </div>
-
-      <div class="stat-card" style="display:flex;flex-direction:column;gap:12px;">
-        <div style="width:40px;height:40px;background:rgba(100,255,218,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-          <i data-lucide="sparkles" style="width:20px;height:20px;color:var(--teal);stroke-width:1.5;"></i>
+      <div class="stat-card s3-card" style="display:flex;flex-direction:column;gap:12px">
+        <div style="width:42px;height:42px;background:rgba(0,255,178,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <i data-lucide="sparkles" style="width:20px;height:20px;color:var(--teal);stroke-width:1.5"></i>
         </div>
-        <div>
-          <p style="font-size:15px;font-weight:600;margin-bottom:4px;">AI Brief</p>
-          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Claude generates a ward-specific intervention brief with projected bottle reduction.</p>
-        </div>
+        <p style="font-size:15px;font-weight:700">AI Brief</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.55">Claude generates a ward-specific intervention brief with projected bottle reduction.</p>
       </div>
-
     </div>
 
-    <div class="highlight" style="display:flex;align-items:center;gap:16px;">
-      <i data-lucide="message-circle" style="width:18px;height:18px;color:var(--teal);flex-shrink:0;stroke-width:1.5;"></i>
-      <p style="font-size:14px;color:var(--text);">Built-in chat assistant — ask anything about Tokyo's refill situation, ward by ward.</p>
-    </div>
-
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 4 — HOW IT WORKS
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-4">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%;">
-
-    <div>
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">How It Works</p>
-      <h2 class="font-display" style="font-size:40px;font-weight:700;letter-spacing:-0.03em;">Data → Score → Recommendation</h2>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:12px;">
-
-      <div style="display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span class="font-mono" style="font-size:11px;color:var(--coral);font-weight:500;min-width:24px;">01</span>
-        <i data-lucide="database" style="width:18px;height:18px;color:var(--muted);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Ingest</p>
-          <p style="font-size:12px;color:var(--muted);">3,224 mymizu stations (lat/lng) + Tokyo 23-ward GeoJSON + Ministry of Environment waste data</p>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span class="font-mono" style="font-size:11px;color:var(--coral);font-weight:500;min-width:24px;">02</span>
-        <i data-lucide="git-branch" style="width:18px;height:18px;color:var(--muted);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Spatial Join</p>
-          <p style="font-size:12px;color:var(--muted);">@turf/turf point-in-polygon → station count per ward → coverage density (stations/km²)</p>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span class="font-mono" style="font-size:11px;color:var(--coral);font-weight:500;min-width:24px;">03</span>
-        <i data-lucide="bar-chart-2" style="width:18px;height:18px;color:var(--muted);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Score</p>
-          <p class="font-mono" style="font-size:12px;color:var(--teal);">severity = waste_per_capita / (stations/km² + 0.01) → normalize [0, 100]</p>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span class="font-mono" style="font-size:11px;color:var(--coral);font-weight:500;min-width:24px;">04</span>
-        <i data-lucide="crosshair" style="width:18px;height:18px;color:var(--muted);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Find Gaps</p>
-          <p style="font-size:12px;color:var(--muted);">40×40 candidate grid → max distance to nearest station → top 3, ≥350m apart</p>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span class="font-mono" style="font-size:11px;color:var(--coral);font-weight:500;min-width:24px;">05</span>
-        <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--muted);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Generate Brief</p>
-          <p style="font-size:12px;color:var(--muted);">Claude Sonnet synthesizes ward data + gap locations → 3-sentence intervention plan</p>
-        </div>
-      </div>
-
+    <div id="s3-footer" class="highlight" style="display:flex;align-items:center;gap:14px">
+      <i data-lucide="message-circle" style="width:18px;height:18px;color:var(--teal);flex-shrink:0;stroke-width:1.5"></i>
+      <p style="font-size:14px">Built-in chat assistant — ask anything about Tokyo's refill situation, ward by ward.</p>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 5 — THE NUMBERS
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-5">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:40px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 4 — HOW IT WORKS ══════════════════════ -->
+<div class="slide" id="slide-4" style="background:var(--bg)">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:32px;max-width:1000px;margin:0 auto;width:100%">
 
-    <div>
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">The Numbers</p>
-      <h2 class="font-display" style="font-size:40px;font-weight:700;letter-spacing:-0.03em;">Top 5 Refill Deserts in Tokyo</h2>
+    <div id="s4-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">How It Works</p>
+      <h2 class="font-display" style="font-size:40px;font-weight:800;letter-spacing:-0.04em">Data → Score → Recommendation</h2>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;">
-
-      <div class="ward-row">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span class="font-display" style="font-size:18px;font-weight:700;color:var(--coral);min-width:24px;">1</span>
-          <span style="font-size:15px;font-weight:600;">Adachi</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:24px;">
-          <span style="font-size:12px;color:var(--muted);">1.31 /km²</span>
-          <span style="font-size:12px;color:var(--muted);">70 stations</span>
-          <span style="font-size:12px;color:var(--muted);">51.2 kg/cap</span>
-          <span class="font-mono" style="font-size:12px;background:rgba(189,0,38,0.3);color:#ff6b6b;padding:3px 8px;border-radius:4px;">100/100</span>
-        </div>
-      </div>
-
-      <div class="ward-row">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span class="font-display" style="font-size:18px;font-weight:700;color:var(--coral);min-width:24px;">2</span>
-          <span style="font-size:15px;font-weight:600;">Katsushika</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:24px;">
-          <span style="font-size:12px;color:var(--muted);">1.43 /km²</span>
-          <span style="font-size:12px;color:var(--muted);">50 stations</span>
-          <span style="font-size:12px;color:var(--muted);">49.7 kg/cap</span>
-          <span class="font-mono" style="font-size:12px;background:rgba(240,59,32,0.3);color:#fd8d3c;padding:3px 8px;border-radius:4px;">87/100</span>
-        </div>
-      </div>
-
-      <div class="ward-row">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span class="font-display" style="font-size:18px;font-weight:700;color:#fb923c;min-width:24px;">3</span>
-          <span style="font-size:15px;font-weight:600;">Edogawa</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:24px;">
-          <span style="font-size:12px;color:var(--muted);">1.70 /km²</span>
-          <span style="font-size:12px;color:var(--muted);">83 stations</span>
-          <span style="font-size:12px;color:var(--muted);">50.1 kg/cap</span>
-          <span class="font-mono" style="font-size:12px;background:rgba(253,141,60,0.25);color:#fd8d3c;padding:3px 8px;border-radius:4px;">72/100</span>
-        </div>
-      </div>
-
-      <div class="ward-row">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span class="font-display" style="font-size:18px;font-weight:700;color:#fbbf24;min-width:24px;">4</span>
-          <span style="font-size:15px;font-weight:600;">Itabashi</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:24px;">
-          <span style="font-size:12px;color:var(--muted);">1.77 /km²</span>
-          <span style="font-size:12px;color:var(--muted);">57 stations</span>
-          <span style="font-size:12px;color:var(--muted);">47.5 kg/cap</span>
-          <span class="font-mono" style="font-size:12px;background:rgba(254,204,92,0.2);color:#fecc5c;padding:3px 8px;border-radius:4px;">64/100</span>
-        </div>
-      </div>
-
-      <div class="ward-row">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span class="font-display" style="font-size:18px;font-weight:700;color:#fbbf24;min-width:24px;">5</span>
-          <span style="font-size:15px;font-weight:600;">Kita</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:24px;">
-          <span style="font-size:12px;color:var(--muted);">2.04 /km²</span>
-          <span style="font-size:12px;color:var(--muted);">42 stations</span>
-          <span style="font-size:12px;color:var(--muted);">47.1 kg/cap</span>
-          <span class="font-mono" style="font-size:12px;background:rgba(254,204,92,0.2);color:#fecc5c;padding:3px 8px;border-radius:4px;">53/100</span>
-        </div>
-      </div>
+    <div style="display:flex;flex-direction:column;gap:10px" id="s4-steps">
+      <div class="step-row"><span class="font-mono" style="font-size:11px;color:var(--coral);min-width:24px">01</span><i data-lucide="database" style="width:17px;height:17px;color:var(--muted);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Ingest</p><p style="font-size:12px;color:var(--muted)">3,224 mymizu stations + Tokyo 23-ward GeoJSON + Ministry of Environment waste data</p></div></div>
+      <div class="step-row"><span class="font-mono" style="font-size:11px;color:var(--coral);min-width:24px">02</span><i data-lucide="git-branch" style="width:17px;height:17px;color:var(--muted);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Spatial Join</p><p style="font-size:12px;color:var(--muted)">@turf/turf point-in-polygon → station count per ward → coverage density (stations/km²)</p></div></div>
+      <div class="step-row"><span class="font-mono" style="font-size:11px;color:var(--coral);min-width:24px">03</span><i data-lucide="bar-chart-2" style="width:17px;height:17px;color:var(--muted);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Score</p><p class="font-mono" style="font-size:12px;color:var(--teal)">severity = waste_per_capita / (stations/km² + 0.01) → normalize [0, 100]</p></div></div>
+      <div class="step-row"><span class="font-mono" style="font-size:11px;color:var(--coral);min-width:24px">04</span><i data-lucide="crosshair" style="width:17px;height:17px;color:var(--muted);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Find Gaps</p><p style="font-size:12px;color:var(--muted)">40×40 candidate grid → max distance to nearest station → top 3, ≥350m apart</p></div></div>
+      <div class="step-row"><span class="font-mono" style="font-size:11px;color:var(--coral);min-width:24px">05</span><i data-lucide="sparkles" style="width:17px;height:17px;color:var(--muted);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Generate Brief</p><p style="font-size:12px;color:var(--muted)">Claude Sonnet synthesizes ward data + gap locations → 3-sentence intervention plan</p></div></div>
     </div>
-
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="gradient-bar" style="flex:1;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:-28px;">
-      <span style="font-size:11px;color:var(--muted);">Low (0)</span>
-      <span style="font-size:11px;color:var(--muted);">Severity</span>
-      <span style="font-size:11px;color:var(--muted);">High (100)</span>
-    </div>
-
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 6 — IMPACT
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-6">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:72px 80px;gap:48px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 5 — NUMBERS ══════════════════════ -->
+<div class="slide" id="slide-5" style="background:var(--bg)">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%">
 
-    <div style="text-align:center;">
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--coral);text-transform:uppercase;margin-bottom:12px;">Projected Impact</p>
-      <h2 class="font-display" style="font-size:40px;font-weight:700;letter-spacing:-0.03em;">Just 3 new stations in Adachi</h2>
+    <div id="s5-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">The Numbers</p>
+      <h2 class="font-display" style="font-size:40px;font-weight:800;letter-spacing:-0.04em">Top 5 Refill Deserts in Tokyo</h2>
     </div>
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-      <p id="impact-number" class="font-mono" style="font-size:80px;font-weight:500;color:var(--teal);letter-spacing:-0.04em;line-height:1;">~636,000</p>
-      <p style="font-size:20px;color:var(--muted);">plastic bottles eliminated per year</p>
+    <div style="display:flex;flex-direction:column;gap:8px" id="s5-rows">
+      <div class="ward-row" style="opacity:0;transform:translateX(60px)"><div style="display:flex;align-items:center;gap:12px"><span class="font-display" style="font-size:18px;font-weight:800;color:var(--coral);min-width:24px">1</span><span style="font-size:15px;font-weight:600">Adachi</span></div><div style="display:flex;align-items:center;gap:20px"><span style="font-size:12px;color:var(--muted)">1.31/km²</span><span style="font-size:12px;color:var(--muted)">70 stations</span><span style="font-size:12px;color:var(--muted)">51.2 kg/cap</span><span class="font-mono" style="font-size:12px;background:rgba(189,0,38,0.3);color:#ff6b6b;padding:3px 10px;border-radius:4px">100/100</span></div></div>
+      <div class="ward-row" style="opacity:0;transform:translateX(60px)"><div style="display:flex;align-items:center;gap:12px"><span class="font-display" style="font-size:18px;font-weight:800;color:var(--coral);min-width:24px">2</span><span style="font-size:15px;font-weight:600">Katsushika</span></div><div style="display:flex;align-items:center;gap:20px"><span style="font-size:12px;color:var(--muted)">1.43/km²</span><span style="font-size:12px;color:var(--muted)">50 stations</span><span style="font-size:12px;color:var(--muted)">49.7 kg/cap</span><span class="font-mono" style="font-size:12px;background:rgba(240,59,32,0.3);color:#fd8d3c;padding:3px 10px;border-radius:4px">87/100</span></div></div>
+      <div class="ward-row" style="opacity:0;transform:translateX(60px)"><div style="display:flex;align-items:center;gap:12px"><span class="font-display" style="font-size:18px;font-weight:800;color:#fb923c;min-width:24px">3</span><span style="font-size:15px;font-weight:600">Edogawa</span></div><div style="display:flex;align-items:center;gap:20px"><span style="font-size:12px;color:var(--muted)">1.70/km²</span><span style="font-size:12px;color:var(--muted)">83 stations</span><span style="font-size:12px;color:var(--muted)">50.1 kg/cap</span><span class="font-mono" style="font-size:12px;background:rgba(253,141,60,0.25);color:#fd8d3c;padding:3px 10px;border-radius:4px">72/100</span></div></div>
+      <div class="ward-row" style="opacity:0;transform:translateX(60px)"><div style="display:flex;align-items:center;gap:12px"><span class="font-display" style="font-size:18px;font-weight:800;color:#fbbf24;min-width:24px">4</span><span style="font-size:15px;font-weight:600">Itabashi</span></div><div style="display:flex;align-items:center;gap:20px"><span style="font-size:12px;color:var(--muted)">1.77/km²</span><span style="font-size:12px;color:var(--muted)">57 stations</span><span style="font-size:12px;color:var(--muted)">47.5 kg/cap</span><span class="font-mono" style="font-size:12px;background:rgba(254,204,92,0.2);color:#fecc5c;padding:3px 10px;border-radius:4px">64/100</span></div></div>
+      <div class="ward-row" style="opacity:0;transform:translateX(60px)"><div style="display:flex;align-items:center;gap:12px"><span class="font-display" style="font-size:18px;font-weight:800;color:#fbbf24;min-width:24px">5</span><span style="font-size:15px;font-weight:600">Kita</span></div><div style="display:flex;align-items:center;gap:20px"><span style="font-size:12px;color:var(--muted)">2.04/km²</span><span style="font-size:12px;color:var(--muted)">42 stations</span><span style="font-size:12px;color:var(--muted)">47.1 kg/cap</span><span class="font-mono" style="font-size:12px;background:rgba(254,204,92,0.2);color:#fecc5c;padding:3px 10px;border-radius:4px">53/100</span></div></div>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;">
-      <div class="stat-card" style="text-align:center;">
-        <p class="font-mono" style="font-size:28px;font-weight:500;color:var(--coral);">1,759m</p>
-        <p style="font-size:12px;color:var(--muted);margin-top:4px;">largest coverage gap found</p>
-      </div>
-      <div class="stat-card" style="text-align:center;">
-        <p class="font-mono" style="font-size:28px;font-weight:500;color:var(--teal);">500K+</p>
-        <p style="font-size:12px;color:var(--muted);margin-top:4px;">residents in Adachi ward</p>
-      </div>
-      <div class="stat-card" style="text-align:center;">
-        <p class="font-mono" style="font-size:28px;font-weight:500;">5%</p>
-        <p style="font-size:12px;color:var(--muted);margin-top:4px;">adoption rate modeled</p>
-      </div>
+    <div id="s5-bar" style="display:flex;flex-direction:column;gap:6px;opacity:0">
+      <div class="gradient-bar" style="width:0%"></div>
+      <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--muted)">Low (0)</span><span style="font-size:11px;color:var(--muted)">Severity</span><span style="font-size:11px;color:var(--muted)">High (100)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 6 — IMPACT ══════════════════════ -->
+<div class="slide" id="slide-6" style="background:var(--bg);align-items:center;justify-content:center">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 90% 70% at 50% 50%,rgba(0,255,178,0.06) 0%,transparent 70%)"></div>
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:44px;padding:72px 80px;max-width:1000px;width:100%;text-align:center">
+
+    <div id="s6-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--coral);text-transform:uppercase;margin-bottom:14px">Projected Impact</p>
+      <h2 class="font-display" style="font-size:40px;font-weight:800;letter-spacing:-0.04em">Just 3 new stations in Adachi</h2>
     </div>
 
-    <p style="font-size:13px;color:var(--muted);text-align:center;max-width:560px;line-height:1.6;">
-      Scale this to all 5 desert wards — the outer residential belt of Tokyo has the potential to avoid <span style="color:var(--teal);font-weight:600;">3+ million bottles per year</span> with targeted infrastructure investment.
+    <div id="s6-number" style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <p class="font-mono" style="font-size:88px;font-weight:500;color:var(--teal);letter-spacing:-0.05em;line-height:1">~<span id="s6-counter">0</span></p>
+      <p style="font-size:20px;color:var(--muted)">plastic bottles eliminated per year</p>
+    </div>
+
+    <div id="s6-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%">
+      <div class="stat-card" style="text-align:center"><p class="font-mono" style="font-size:28px;font-weight:500;color:var(--coral)">1,759m</p><p style="font-size:12px;color:var(--muted);margin-top:4px">largest coverage gap</p></div>
+      <div class="stat-card" style="text-align:center"><p class="font-mono" style="font-size:28px;font-weight:500;color:var(--teal)">500K+</p><p style="font-size:12px;color:var(--muted);margin-top:4px">residents in Adachi</p></div>
+      <div class="stat-card" style="text-align:center"><p class="font-mono" style="font-size:28px;font-weight:500">5%</p><p style="font-size:12px;color:var(--muted);margin-top:4px">adoption rate modeled</p></div>
+    </div>
+
+    <p id="s6-footer" style="font-size:13px;color:var(--muted);max-width:560px;line-height:1.65">
+      Scale to all 5 desert wards — the outer belt of Tokyo can avoid <span style="color:var(--teal);font-weight:700">3+ million bottles per year</span> with targeted placement.
     </p>
-
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 7 — TECH STACK
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-7">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 7 — STACK ══════════════════════ -->
+<div class="slide" id="slide-7" style="background:var(--bg)">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 80px;gap:36px;max-width:1000px;margin:0 auto;width:100%">
 
-    <div>
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Tech Stack</p>
-      <h2 class="font-display" style="font-size:40px;font-weight:700;letter-spacing:-0.03em;">Built in &lt; 1 hour</h2>
+    <div id="s7-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">Tech Stack</p>
+      <h2 class="font-display" style="font-size:40px;font-weight:800;letter-spacing:-0.04em">Built in &lt; 1 hour</h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="triangle" style="width:22px;height:22px;color:#ffffff;stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Next.js 15</p>
-          <p style="font-size:12px;color:var(--muted);">App Router · Server Components · API Routes</p>
-        </div>
-      </div>
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="map" style="width:22px;height:22px;color:#4fc3f7;stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">MapLibre GL JS</p>
-          <p style="font-size:12px;color:var(--muted);">WebGL choropleth · cluster markers · live viewport sync</p>
-        </div>
-      </div>
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="compass" style="width:22px;height:22px;color:#81c784;stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">@turf/turf</p>
-          <p style="font-size:12px;color:var(--muted);">Spatial joins · polygon area · gap analysis</p>
-        </div>
-      </div>
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="sparkles" style="width:22px;height:22px;color:var(--coral);stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Anthropic SDK</p>
-          <p style="font-size:12px;color:var(--muted);">Sonnet for briefs · Haiku for chat assistant</p>
-        </div>
-      </div>
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="wind" style="width:22px;height:22px;color:#38bdf8;stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Tailwind CSS</p>
-          <p style="font-size:12px;color:var(--muted);">Custom design system · Space Grotesk · JetBrains Mono</p>
-        </div>
-      </div>
-
-      <div class="stat-card" style="display:flex;align-items:center;gap:16px;">
-        <i data-lucide="cloud" style="width:22px;height:22px;color:#a78bfa;stroke-width:1.5;flex-shrink:0;"></i>
-        <div>
-          <p style="font-size:14px;font-weight:600;">Vercel</p>
-          <p style="font-size:12px;color:var(--muted);">Production deploy · null-island.vercel.app</p>
-        </div>
-      </div>
-
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="s7-cards">
+      <div class="stack-card"><i data-lucide="triangle" style="width:22px;height:22px;color:#fff;stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Next.js 15</p><p style="font-size:12px;color:var(--muted)">App Router · Server Components · API Routes</p></div></div>
+      <div class="stack-card"><i data-lucide="map" style="width:22px;height:22px;color:#4fc3f7;stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">MapLibre GL JS</p><p style="font-size:12px;color:var(--muted)">WebGL choropleth · cluster markers · viewport sync</p></div></div>
+      <div class="stack-card"><i data-lucide="compass" style="width:22px;height:22px;color:#81c784;stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">@turf/turf</p><p style="font-size:12px;color:var(--muted)">Spatial joins · polygon area · gap analysis</p></div></div>
+      <div class="stack-card"><i data-lucide="sparkles" style="width:22px;height:22px;color:var(--coral);stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Anthropic SDK</p><p style="font-size:12px;color:var(--muted)">Sonnet for briefs · Haiku for chat assistant</p></div></div>
+      <div class="stack-card"><i data-lucide="wind" style="width:22px;height:22px;color:#38bdf8;stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Tailwind CSS</p><p style="font-size:12px;color:var(--muted)">Custom design system · Space Grotesk · JetBrains Mono</p></div></div>
+      <div class="stack-card"><i data-lucide="cloud" style="width:22px;height:22px;color:#a78bfa;stroke-width:1.5;flex-shrink:0"></i><div><p style="font-size:14px;font-weight:600">Vercel</p><p style="font-size:12px;color:var(--muted)">Production deploy · null-island.vercel.app</p></div></div>
     </div>
-
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SLIDE 8 — LIVE DEMO / QR
-═══════════════════════════════════════════════════ -->
-<div class="slide" id="slide-8">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:72px 80px;gap:48px;max-width:1000px;margin:0 auto;width:100%;">
+<!-- ══════════════════════ SLIDE 8 — DEMO ══════════════════════ -->
+<div class="slide" id="slide-8" style="background:var(--bg);align-items:center;justify-content:center">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(0,255,178,0.05) 0%,transparent 70%)"></div>
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:44px;padding:72px 80px;max-width:1000px;width:100%;text-align:center">
 
-    <div style="text-align:center;">
-      <p style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--teal);text-transform:uppercase;margin-bottom:12px;">Try It Now</p>
-      <h2 class="font-display" style="font-size:44px;font-weight:700;letter-spacing:-0.03em;">Live on Vercel</h2>
-      <p style="font-size:16px;color:var(--muted);margin-top:8px;">Click any ward. Generate an AI brief. Ask the chat assistant.</p>
+    <div id="s8-header">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--teal);text-transform:uppercase;margin-bottom:14px">Try It Now</p>
+      <h2 class="font-display" style="font-size:46px;font-weight:800;letter-spacing:-0.04em">Live on Vercel</h2>
+      <p style="font-size:16px;color:var(--muted);margin-top:10px">Click any ward. Generate an AI brief. Ask the chat assistant.</p>
     </div>
 
-    <div style="display:flex;gap:64px;align-items:flex-start;justify-content:center;">
-
-      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-        <div class="qr-card">
-          <canvas id="qr-app" width="160" height="160"></canvas>
-        </div>
-        <div style="text-align:center;">
-          <p style="font-size:14px;font-weight:600;">Live App</p>
-          <p class="font-mono" style="font-size:12px;color:var(--teal);">null-island.vercel.app</p>
-        </div>
+    <div id="s8-qrs" style="display:flex;gap:64px;align-items:flex-start;justify-content:center">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div class="qr-card"><canvas id="qr-app" width="160" height="160"></canvas></div>
+        <div><p style="font-size:14px;font-weight:600">Live App</p><p class="font-mono" style="font-size:12px;color:var(--teal)">null-island.vercel.app</p></div>
       </div>
-
-      <div style="width:1px;background:var(--border);align-self:stretch;"></div>
-
-      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-        <div class="qr-card">
-          <canvas id="qr-github" width="160" height="160"></canvas>
-        </div>
-        <div style="text-align:center;">
-          <p style="font-size:14px;font-weight:600;">Source Code</p>
-          <p class="font-mono" style="font-size:12px;color:var(--muted);">github.com/padmanabh-g/<br/>hack-for-tokyo-track-a</p>
-        </div>
-      </div>
-
-    </div>
-
-    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;">
-        <i data-lucide="droplets" style="width:16px;height:16px;color:var(--teal);stroke-width:1.5;"></i>
-        <span style="font-size:13px;">3,224 mymizu stations mapped</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;">
-        <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--coral);stroke-width:1.5;"></i>
-        <span style="font-size:13px;">23 wards scored & ranked</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;">
-        <i data-lucide="sparkles" style="width:16px;height:16px;color:var(--coral);stroke-width:1.5;"></i>
-        <span style="font-size:13px;">Claude-powered AI briefs</span>
+      <div style="width:1px;background:var(--border);align-self:stretch"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div class="qr-card"><canvas id="qr-github" width="160" height="160"></canvas></div>
+        <div><p style="font-size:14px;font-weight:600">Source Code</p><p class="font-mono" style="font-size:12px;color:var(--muted)">github.com/padmanabh-g/<br/>hack-for-tokyo-track-a</p></div>
       </div>
     </div>
 
+    <div id="s8-tags" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px"><i data-lucide="droplets" style="width:15px;height:15px;color:var(--teal);stroke-width:1.5"></i><span style="font-size:13px">3,224 mymizu stations mapped</span></div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px"><i data-lucide="map-pin" style="width:15px;height:15px;color:var(--coral);stroke-width:1.5"></i><span style="font-size:13px">23 wards scored & ranked</span></div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px"><i data-lucide="sparkles" style="width:15px;height:15px;color:var(--coral);stroke-width:1.5"></i><span style="font-size:13px">Claude-powered AI briefs</span></div>
+    </div>
   </div>
 </div>
+
+</div><!-- /stage -->
 
 <!-- Nav -->
 <div id="nav-dots"></div>
 <div id="slide-counter"></div>
-<div id="key-hint">← → to navigate</div>
+<div id="key-hint">← → navigate</div>
 
 <script>
-  const TOTAL = 8
-  let current = 1
-  let animating = false
+const TOTAL = 8
+let current = 1
+let busy = false
 
-  // ── Nav dots ──────────────────────────────────────────────────────────────
-  const dotsEl = document.getElementById('nav-dots')
-  for (let i = 1; i <= TOTAL; i++) {
-    const d = document.createElement('div')
-    d.className = 'dot' + (i === 1 ? ' active' : '')
-    d.onclick = () => goTo(i)
-    dotsEl.appendChild(d)
+// ── Progress bar ───────────────────────────────────────────────
+const progressEl = document.getElementById('progress')
+function setProgress(n) {
+  gsap.to(progressEl, { width: ((n-1)/(TOTAL-1)*100)+'%', duration: 0.4, ease: 'power2.out' })
+}
+
+// ── Nav dots ───────────────────────────────────────────────────
+const dotsEl = document.getElementById('nav-dots')
+for (let i = 1; i <= TOTAL; i++) {
+  const d = document.createElement('div')
+  d.className = 'dot'+(i===1?' active':'')
+  d.onclick = () => goTo(i)
+  dotsEl.appendChild(d)
+}
+function updateDots(n) {
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i+1===n))
+  document.getElementById('slide-counter').textContent = n+' / '+TOTAL
+}
+
+// ── Flash ──────────────────────────────────────────────────────
+function flash(color='rgba(255,255,255,0.18)', dur=0.18) {
+  gsap.killTweensOf('#flash')
+  gsap.fromTo('#flash', {opacity:1,background:color}, {opacity:0,duration:dur,ease:'power2.out'})
+}
+
+// ── Scan line sweep ────────────────────────────────────────────
+function scanSweep() {
+  gsap.fromTo('#scan-line',
+    {top:'-4px', opacity:0.7},
+    {top:'100vh', opacity:0, duration:0.6, ease:'none'}
+  )
+}
+
+// ── Screen shake ───────────────────────────────────────────────
+function shake(el, intensity=12) {
+  const tl = gsap.timeline()
+  for (let i=0; i<6; i++) {
+    tl.to(el, {x: (Math.random()-0.5)*intensity*2, y:(Math.random()-0.5)*intensity, duration:0.04, ease:'none'})
   }
+  tl.to(el, {x:0, y:0, duration:0.06, ease:'power2.out'})
+}
 
-  // ── GSAP slide entrance animation ─────────────────────────────────────────
-  function animateSlideIn(slideEl) {
-    // Collect direct animatable children (skip scripts/canvases)
-    const children = Array.from(slideEl.querySelectorAll(':scope > div > *'))
-    if (!children.length) return
+// ── Ambient particles ──────────────────────────────────────────
+const bgCanvas = document.getElementById('bg-canvas')
+const bgCtx = bgCanvas.getContext('2d')
+const particles = []
 
-    gsap.killTweensOf(children)
-    gsap.fromTo(children,
-      { opacity: 0, y: 28 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.55,
-        ease: 'power3.out',
-        stagger: 0.07,
-        clearProps: 'transform,opacity',
-        onComplete: () => { animating = false }
-      }
+function resizeBg() {
+  bgCanvas.width = window.innerWidth
+  bgCanvas.height = window.innerHeight
+}
+resizeBg()
+window.addEventListener('resize', resizeBg)
+
+for (let i=0; i<60; i++) {
+  particles.push({
+    x: Math.random()*window.innerWidth,
+    y: Math.random()*window.innerHeight,
+    r: 0.5+Math.random()*1.5,
+    vx: (Math.random()-0.5)*0.15,
+    vy: -0.1-Math.random()*0.2,
+    alpha: 0.1+Math.random()*0.25,
+    color: Math.random()>0.6 ? '#00FFB2' : '#FF4D1C'
+  })
+}
+
+let bgColor = [0,255,178] // teal
+const SLIDE_COLORS = {
+  1:[0,255,178], 2:[255,77,28], 3:[0,255,178],
+  4:[100,180,255], 5:[255,200,50], 6:[0,255,178], 7:[150,120,255], 8:[0,255,178]
+}
+
+function tickBg() {
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height)
+  particles.forEach(p => {
+    p.x+=p.vx; p.y+=p.vy
+    if (p.y<-4) { p.y=bgCanvas.height+4; p.x=Math.random()*bgCanvas.width }
+    if (p.x<0) p.x=bgCanvas.width
+    if (p.x>bgCanvas.width) p.x=0
+    bgCtx.beginPath()
+    bgCtx.arc(p.x,p.y,p.r,0,Math.PI*2)
+    bgCtx.fillStyle=p.color
+    bgCtx.globalAlpha=p.alpha
+    bgCtx.fill()
+  })
+  bgCtx.globalAlpha=1
+  requestAnimationFrame(tickBg)
+}
+tickBg()
+
+// ── Confetti ───────────────────────────────────────────────────
+const cc = document.getElementById('confetti-canvas')
+const cctx = cc.getContext('2d')
+let cparts=[], craf=null
+function resizeCc() { cc.width=window.innerWidth; cc.height=window.innerHeight }
+resizeCc(); window.addEventListener('resize', resizeCc)
+
+const CCOLORS=['#00FFB2','#FF4D1C','#ffffff','#facc15','#a78bfa','#38bdf8','#fb7185','#4ade80']
+function spawnConfetti(n=200) {
+  cparts=[]
+  const cx=window.innerWidth/2, cy=window.innerHeight*0.38
+  for (let i=0; i<n; i++) {
+    const a=Math.random()*Math.PI*2, spd=5+Math.random()*14
+    cparts.push({
+      x:cx+(Math.random()-0.5)*160, y:cy,
+      vx:Math.cos(a)*spd, vy:-(7+Math.random()*12),
+      s:4+Math.random()*8, color:CCOLORS[i%CCOLORS.length],
+      rot:Math.random()*360, rspd:(Math.random()-0.5)*10,
+      alpha:1, decay:0.005+Math.random()*0.004,
+      shape:Math.random()>0.4?'rect':'circle', g:0.38+Math.random()*0.2
+    })
+  }
+  if (craf) cancelAnimationFrame(craf)
+  tickC()
+}
+function tickC() {
+  cctx.clearRect(0,0,cc.width,cc.height)
+  let alive=false
+  cparts.forEach(p => {
+    if (p.alpha<=0) return
+    alive=true
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.vx*=0.99; p.rot+=p.rspd; p.alpha-=p.decay
+    cctx.save()
+    cctx.globalAlpha=Math.max(0,p.alpha)
+    cctx.translate(p.x,p.y); cctx.rotate(p.rot*Math.PI/180)
+    cctx.fillStyle=p.color
+    if (p.shape==='rect') cctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2)
+    else { cctx.beginPath(); cctx.arc(0,0,p.s/2,0,Math.PI*2); cctx.fill() }
+    cctx.restore()
+  })
+  if (alive) craf=requestAnimationFrame(tickC)
+  else cctx.clearRect(0,0,cc.width,cc.height)
+}
+
+// ── Text scramble ──────────────────────────────────────────────
+function scramble(el, finalText, dur=900) {
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz0123456789@#$%&'
+  let start=null
+  function tick(ts) {
+    if (!start) start=ts
+    const p=Math.min((ts-start)/dur,1)
+    const rev=Math.floor(p*finalText.length)
+    let out=''
+    for (let i=0;i<finalText.length;i++) {
+      if (i<rev || finalText[i]===' ') out+=finalText[i]
+      else out+=chars[Math.floor(Math.random()*chars.length)]
+    }
+    el.textContent=out
+    if (p<1) requestAnimationFrame(tick)
+    else el.textContent=finalText
+  }
+  requestAnimationFrame(tick)
+}
+
+// ── Counter ────────────────────────────────────────────────────
+function counter(el, to, dur=1.4, decimals=0, prefix='') {
+  const obj={v:0}
+  gsap.to(obj, {v:to, duration:dur, ease:'power2.out',
+    onUpdate:() => {
+      const val=decimals>0 ? obj.v.toFixed(decimals) : Math.round(obj.v).toLocaleString()
+      el.textContent=prefix+val
+    }
+  })
+}
+
+// ── Per-slide entrance animations ──────────────────────────────
+const slideAnims = {
+  1(el) {
+    gsap.from('#s1-logo', {scale:0.6, opacity:0, duration:0.7, ease:'back.out(2)'})
+    gsap.from('#s1-sub',  {opacity:0, y:20, duration:0.6, delay:0.25, ease:'power3.out'})
+    gsap.from('#s1-tags > *', {opacity:0, y:16, scale:0.85, duration:0.5, stagger:0.1, delay:0.45, ease:'back.out(1.8)'})
+    gsap.from('#s1-url', {opacity:0, duration:0.5, delay:0.7})
+    const titleEl = document.querySelector('#s1-title')
+    setTimeout(()=>scramble(titleEl,'NullIsland',800), 150)
+  },
+  2(el) {
+    gsap.from('#s2-header', {x:-60, opacity:0, duration:0.55, ease:'power4.out'})
+    gsap.from('#s2-cards > *', {x:-40, opacity:0, duration:0.5, stagger:0.12, delay:0.2, ease:'power3.out'})
+    gsap.from('#s2-stats > *', {y:30, opacity:0, duration:0.45, stagger:0.1, delay:0.4, ease:'power3.out'})
+    // red flash on headline land
+    setTimeout(()=>{flash('rgba(255,77,28,0.22)',0.4)},80)
+    // count up numbers
+    setTimeout(()=>{
+      counter(document.getElementById('s2-n1'),51.2,1.2,1)
+      counter(document.getElementById('s2-n2'),1.31,1.4,2)
+      counter(document.getElementById('s2-n3'),100,1.0)
+    },400)
+  },
+  3(el) {
+    gsap.from('#s3-header', {y:-40, opacity:0, duration:0.6, ease:'power4.out'})
+    const cards=document.querySelectorAll('.s3-card')
+    cards.forEach((c,i)=>{
+      const fromX=i===0?-70:i===1?0:70
+      gsap.from(c,{x:fromX, y:i===1?-50:0, opacity:0, duration:0.6, delay:0.2+i*0.12, ease:'back.out(1.5)'})
+    })
+    gsap.from('#s3-footer',{y:30,opacity:0,duration:0.5,delay:0.6,ease:'power3.out'})
+  },
+  4(el) {
+    gsap.from('#s4-header',{y:-30,opacity:0,duration:0.5,ease:'power3.out'})
+    const rows=document.querySelectorAll('.step-row')
+    rows.forEach((r,i)=>{
+      gsap.to(r,{opacity:1,x:0,duration:0.45,delay:0.2+i*0.18,ease:'power3.out'})
+    })
+  },
+  5(el) {
+    gsap.from('#s5-header',{y:-30,opacity:0,duration:0.5,ease:'power3.out'})
+    const rows=document.querySelectorAll('#s5-rows .ward-row')
+    rows.forEach((r,i)=>{
+      gsap.to(r,{opacity:1,x:0,duration:0.5,delay:0.15+i*0.13,ease:'back.out(1.4)'})
+    })
+    gsap.to('#s5-bar',{opacity:1,duration:0.4,delay:0.9})
+    gsap.fromTo('#s5-bar .gradient-bar',{width:'0%'},{width:'100%',duration:1.1,delay:1.0,ease:'power2.out'})
+  },
+  6(el) {
+    gsap.from('#s6-header',{y:-40,opacity:0,duration:0.55,ease:'power4.out'})
+    gsap.fromTo('#s6-number',{scale:0.3,opacity:0},{scale:1,opacity:1,duration:0.8,delay:0.2,ease:'back.out(2)'})
+    gsap.from('#s6-cards > *',{y:50,opacity:0,scale:0.8,duration:0.55,stagger:0.12,delay:0.5,ease:'back.out(1.7)'})
+    gsap.from('#s6-footer',{opacity:0,y:20,duration:0.5,delay:0.9})
+    setTimeout(()=>counter(document.getElementById('s6-counter'),636000,2.0),300)
+    setTimeout(spawnConfetti, 400)
+    setTimeout(()=>flash('rgba(0,255,178,0.12)',0.6), 350)
+  },
+  7(el) {
+    gsap.from('#s7-header',{x:-40,opacity:0,duration:0.5,ease:'power4.out'})
+    const cards=document.querySelectorAll('.stack-card')
+    gsap.fromTo(cards,
+      {rotateY:90,opacity:0,transformPerspective:900,transformOrigin:'left center'},
+      {rotateY:0,opacity:1,duration:0.55,stagger:0.09,delay:0.2,ease:'back.out(1.4)'}
     )
+  },
+  8(el) {
+    gsap.from('#s8-header',{y:-40,opacity:0,duration:0.6,ease:'power4.out'})
+    gsap.fromTo('#s8-qrs > *',{scale:0,opacity:0},{scale:1,opacity:1,duration:0.65,stagger:0.18,delay:0.3,ease:'back.out(2)'})
+    gsap.from('#s8-tags > *',{y:24,opacity:0,duration:0.45,stagger:0.1,delay:0.7,ease:'power3.out'})
   }
+}
 
-  // ── Confetti ──────────────────────────────────────────────────────────────
-  const canvas = document.getElementById('confetti-canvas')
-  const ctx = canvas.getContext('2d')
-  let confettiParticles = []
-  let confettiActive = false
-  let confettiRaf = null
+// ── Transition definitions ─────────────────────────────────────
+// 7 transitions for 7 gaps between 8 slides
+const TRANSITIONS = [
+  // 1→2: CRACK SPLIT — clip-path implodes, new expands
+  (out,inn,fwd,cb)=>{
+    gsap.to(out,{clipPath:'inset(48% 0% 48% 0%)',duration:0.42,ease:'power4.in',onComplete:()=>{
+      out.style.display='none'
+      gsap.set(inn,{clipPath:'inset(48% 0% 48% 0%)',display:'flex'})
+      gsap.to(inn,{clipPath:'inset(0% 0% 0% 0%)',duration:0.5,ease:'expo.out',onComplete:cb})
+    }})
+    flash('rgba(255,255,255,0.12)')
+  },
+  // 2→3: WARP ZOOM — out implodes to dot, in explodes from dot
+  (out,inn,fwd,cb)=>{
+    gsap.to(out,{scale:fwd?0.05:2,opacity:0,duration:0.38,ease:fwd?'power4.in':'power2.in',transformPerspective:1000,onComplete:()=>{
+      out.style.display='none'
+      gsap.set(inn,{scale:fwd?2:0.05,opacity:0,display:'flex',transformPerspective:1000})
+      gsap.to(inn,{scale:1,opacity:1,duration:0.55,ease:fwd?'back.out(1.6)':'back.out(1.8)',onComplete:cb})
+    }})
+    flash('rgba(255,255,255,0.2)',0.15)
+  },
+  // 3→4: SLAM HORIZONTAL with elastic overshoot
+  (out,inn,fwd,cb)=>{
+    const dir=fwd?-1:1
+    gsap.to(out,{x:dir*window.innerWidth*1.1,duration:0.38,ease:'power3.in',onComplete:()=>{
+      out.style.display='none'; gsap.set(out,{x:0})
+      gsap.set(inn,{x:-dir*window.innerWidth*1.1,display:'flex'})
+      gsap.to(inn,{x:0,duration:0.55,ease:'back.out(1.3)',onComplete:cb})
+    }})
+    flash()
+  },
+  // 4→5: 3D FLIP on Y axis
+  (out,inn,fwd,cb)=>{
+    gsap.to(out,{rotateY:fwd?-90:90,opacity:0,duration:0.32,ease:'power3.in',transformPerspective:1200,onComplete:()=>{
+      out.style.display='none'; gsap.set(out,{rotateY:0})
+      gsap.set(inn,{rotateY:fwd?90:-90,opacity:0,display:'flex',transformPerspective:1200})
+      gsap.to(inn,{rotateY:0,opacity:1,duration:0.48,ease:'power2.out',onComplete:cb})
+    }})
+    flash('rgba(100,180,255,0.15)')
+  },
+  // 5→6: IMPACT — slam up + screen shake + flash burst
+  (out,inn,fwd,cb)=>{
+    const dir=fwd?-1:1
+    gsap.to(out,{y:dir*window.innerHeight,duration:0.38,ease:'power4.in',onComplete:()=>{
+      out.style.display='none'; gsap.set(out,{y:0})
+      gsap.set(inn,{y:-dir*window.innerHeight,display:'flex'})
+      gsap.to(inn,{y:0,duration:0.5,ease:'back.out(1.5)',onComplete:cb})
+      shake(document.getElementById('stage'),16)
+      flash('rgba(0,255,178,0.25)',0.3)
+    }})
+  },
+  // 6→7: GLITCH — RGB split oscillation + static bursts
+  (out,inn,fwd,cb)=>{
+    const tl=gsap.timeline({onComplete:()=>{
+      out.style.display='none'
+      gsap.set(out,{x:0,skewX:0,filter:'none'})
+      gsap.set(inn,{x:fwd?60:-60,opacity:0,display:'flex'})
+      gsap.to(inn,{x:0,opacity:1,duration:0.4,ease:'power3.out',onComplete:cb})
+    }})
+    for (let i=0;i<7;i++) tl.to(out,{x:(Math.random()-0.5)*28,skewX:(Math.random()-0.5)*6,filter:`hue-rotate(${Math.random()*360}deg) saturate(3)`,duration:0.045,ease:'none'})
+    tl.to(out,{opacity:0,duration:0.1})
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-  }
-  resizeCanvas()
-  window.addEventListener('resize', resizeCanvas)
-
-  const COLORS = ['#64FFDA', '#FF6B35', '#ffffff', '#facc15', '#a78bfa', '#38bdf8', '#fb7185']
-
-  function spawnConfetti(count = 160) {
-    confettiParticles = []
-    const cx = window.innerWidth / 2
-    const cy = window.innerHeight * 0.4
-
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.random() * Math.PI * 2)
-      const speed = 4 + Math.random() * 10
-      confettiParticles.push({
-        x: cx + (Math.random() - 0.5) * 200,
-        y: cy,
-        vx: Math.cos(angle) * speed,
-        vy: -(6 + Math.random() * 10),
-        size: 5 + Math.random() * 7,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 8,
-        shape: Math.random() > 0.5 ? 'rect' : 'circle',
-        alpha: 1,
-        gravity: 0.35 + Math.random() * 0.2,
-        decay: 0.004 + Math.random() * 0.003,
-      })
-    }
-    confettiActive = true
-    if (confettiRaf) cancelAnimationFrame(confettiRaf)
-    tickConfetti()
-  }
-
-  function tickConfetti() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    let alive = false
-
-    for (const p of confettiParticles) {
-      if (p.alpha <= 0) continue
-      alive = true
-
-      p.vy += p.gravity
-      p.x += p.vx
-      p.y += p.vy
-      p.vx *= 0.99
-      p.rotation += p.rotSpeed
-      p.alpha -= p.decay
-
-      ctx.save()
-      ctx.globalAlpha = Math.max(0, p.alpha)
-      ctx.translate(p.x, p.y)
-      ctx.rotate((p.rotation * Math.PI) / 180)
-      ctx.fillStyle = p.color
-
-      if (p.shape === 'rect') {
-        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2)
-      } else {
-        ctx.beginPath()
-        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      ctx.restore()
-    }
-
-    if (alive) {
-      confettiRaf = requestAnimationFrame(tickConfetti)
-    } else {
-      confettiActive = false
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
-  }
-
-  // ── Slide navigation ──────────────────────────────────────────────────────
-  function goTo(n) {
-    if (animating) return
-    const next = Math.max(1, Math.min(TOTAL, n))
-    if (next === current) return
-
-    animating = true
-
-    const outEl = document.getElementById('slide-' + current)
-    const inEl  = document.getElementById('slide-' + next)
-
-    // Fade out current
-    gsap.to(outEl, {
-      opacity: 0,
-      duration: 0.2,
-      ease: 'power2.in',
-      onComplete: () => {
-        outEl.classList.remove('active')
-        gsap.set(outEl, { opacity: 1 })
-
-        inEl.classList.add('active')
-        gsap.set(inEl, { opacity: 0 })
-        gsap.to(inEl, { opacity: 1, duration: 0.25, ease: 'power2.out' })
-
-        animateSlideIn(inEl)
-
-        // Confetti on impact slide
-        if (next === 6) {
-          setTimeout(spawnConfetti, 300)
-        }
-
-        // Pulse the big number on slide 6
-        if (next === 6) {
-          setTimeout(() => {
-            const num = document.getElementById('impact-number')
-            if (num) {
-              gsap.fromTo(num,
-                { scale: 0.6, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.8)' }
-              )
-            }
-          }, 200)
-        }
-      }
+    // flash bursts
+    ;[0,0.08,0.16,0.24].forEach(t=>{
+      setTimeout(()=>flash(['rgba(255,0,100,0.3)','rgba(0,200,255,0.3)','rgba(255,255,255,0.4)'][Math.floor(Math.random()*3)],0.06), t*1000)
     })
-
-    // Update dots
-    document.querySelectorAll('.dot')[current - 1]?.classList.remove('active')
-    document.querySelectorAll('.dot')[next - 1]?.classList.add('active')
-    document.getElementById('slide-counter').textContent = next + ' / ' + TOTAL
-    current = next
+  },
+  // 7→8: CURTAIN — reveal from center outward
+  (out,inn,fwd,cb)=>{
+    gsap.to(out,{scaleX:fwd?0.01:2,opacity:fwd?0.5:0,duration:0.4,ease:'power4.in',transformOrigin:'50% 50%',onComplete:()=>{
+      out.style.display='none'; gsap.set(out,{scaleX:1,opacity:1})
+      gsap.set(inn,{clipPath:'inset(0% 50% 0% 50%)',display:'flex'})
+      gsap.to(inn,{clipPath:'inset(0% 0% 0% 0%)',duration:0.55,ease:'expo.out',onComplete:cb})
+    }})
+    flash('rgba(150,120,255,0.2)')
   }
+]
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1)
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') goTo(current - 1)
-  })
+// ── Main navigation ────────────────────────────────────────────
+function goTo(n) {
+  if (busy) return
+  const next=Math.max(1,Math.min(TOTAL,n))
+  if (next===current) return
+  busy=true
 
-  let touchX = 0
-  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX })
-  document.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchX
-    if (dx < -40) goTo(current + 1)
-    if (dx > 40)  goTo(current - 1)
-  })
+  const fwd=next>current
+  const tIdx=fwd ? current-1 : next-1   // which transition to use
+  const outEl=document.getElementById('slide-'+current)
+  const inEl =document.getElementById('slide-'+next)
 
-  document.getElementById('slide-counter').textContent = '1 / ' + TOTAL
+  inEl.style.display='flex'
+  gsap.set(inEl,{zIndex:1}); gsap.set(outEl,{zIndex:2})
 
-  // ── Init ──────────────────────────────────────────────────────────────────
-  window.addEventListener('load', () => {
-    lucide.createIcons()
+  const transition=TRANSITIONS[Math.min(tIdx, TRANSITIONS.length-1)]
+  transition(outEl, inEl, fwd, ()=>{
+    gsap.set(outEl,{zIndex:'',clipPath:'',x:0,y:0,scale:1,rotate:0,rotateY:0,opacity:1,filter:'none',skewX:0,scaleX:1,transformOrigin:'50% 50%'})
+    gsap.set(inEl,{zIndex:'',clipPath:'',x:0,y:0,scale:1,rotate:0,rotateY:0,opacity:1,filter:'none',skewX:0,scaleX:1,transformOrigin:'50% 50%'})
+    current=next
+    busy=false
+    updateDots(next)
+    setProgress(next)
+    scanSweep()
+    slideAnims[next]?.(inEl)
 
-    // Animate first slide in immediately
-    const firstSlide = document.getElementById('slide-1')
-    gsap.set(firstSlide, { opacity: 0 })
-    gsap.to(firstSlide, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-    animateSlideIn(firstSlide)
-
-    QRCode.toCanvas(document.getElementById('qr-app'), 'https://null-island.vercel.app/', {
-      width: 160, margin: 1,
-      color: { dark: '#111111', light: '#ffffff' }
-    })
-    QRCode.toCanvas(document.getElementById('qr-github'), 'https://github.com/padmanabh-g/hack-for-tokyo-track-a', {
-      width: 160, margin: 1,
-      color: { dark: '#111111', light: '#ffffff' }
+    // shift particle color
+    const c=SLIDE_COLORS[next]
+    particles.forEach((p,i)=>{
+      if (i%3===0) p.color=`rgb(${c[0]},${c[1]},${c[2]})`
     })
   })
+
+  updateDots(next)
+}
+
+// ── Input ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e=>{
+  if (e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') goTo(current+1)
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')               goTo(current-1)
+})
+let tx=0
+document.addEventListener('touchstart', e=>{tx=e.touches[0].clientX})
+document.addEventListener('touchend',   e=>{
+  const dx=e.changedTouches[0].clientX-tx
+  if (dx<-40) goTo(current+1)
+  if (dx>40)  goTo(current-1)
+})
+
+// ── Init ───────────────────────────────────────────────────────
+window.addEventListener('load', ()=>{
+  lucide.createIcons()
+  updateDots(1)
+  document.getElementById('slide-counter').textContent='1 / '+TOTAL
+
+  // Cinematic opening: black → projector flash → slide 1 in
+  const f=document.getElementById('flash')
+  gsap.timeline()
+    .set(f,{opacity:1,background:'#000'})
+    .to(f,{opacity:1,duration:0.4})
+    .to(f,{opacity:0.9,background:'#ffffff',duration:0.06},0.4)
+    .to(f,{opacity:0,duration:0.5,ease:'power2.out'},0.46)
+
+  setTimeout(()=>{
+    slideAnims[1]?.()
+    scanSweep()
+    setProgress(1)
+  }, 500)
+
+  QRCode.toCanvas(document.getElementById('qr-app'),'https://null-island.vercel.app/',{width:160,margin:1,color:{dark:'#111111',light:'#ffffff'}})
+  QRCode.toCanvas(document.getElementById('qr-github'),'https://github.com/padmanabh-g/hack-for-tokyo-track-a',{width:160,margin:1,color:{dark:'#111111',light:'#ffffff'}})
+})
 </script>
 </body>
 </html>
