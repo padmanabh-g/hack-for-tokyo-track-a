@@ -13,14 +13,19 @@ interface OverviewPanelProps {
     avgCoverage: number
   }
   onWardClick: (wardName: string) => void
+  visibleWardNames?: string[]
 }
 
-export function OverviewPanel({ wardsGeoJSON, stats, onWardClick }: OverviewPanelProps) {
-  // Sort wards by desert_severity descending, take top 5
-  const top5 = [...wardsGeoJSON.features]
+export function OverviewPanel({ wardsGeoJSON, stats, onWardClick, visibleWardNames }: OverviewPanelProps) {
+  const allWards = [...wardsGeoJSON.features]
     .map(f => f.properties as WardProperties)
     .sort((a, b) => b.desert_severity - a.desert_severity)
-    .slice(0, 5)
+
+  // When zoomed in, filter to visible wards only; fall back to top-5 globally
+  const isFiltered = visibleWardNames && visibleWardNames.length > 0 && visibleWardNames.length < 23
+  const displayWards = isFiltered
+    ? allWards.filter(w => visibleWardNames!.includes(w.ward_name))
+    : allWards.slice(0, 5)
 
   const getSeverityColor = (rank: number) => {
     if (rank <= 2) return 'text-coral'
@@ -42,17 +47,26 @@ export function OverviewPanel({ wardsGeoJSON, stats, onWardClick }: OverviewPane
         <div className="flex items-center gap-2 mb-1">
           <Flame size={17} className="text-coral" strokeWidth={1.5} />
           <h2 className="font-display font-bold text-lg text-text-primary tracking-tight">
-            Tokyo&apos;s Top Refill Deserts
+            {isFiltered ? 'In View' : "Tokyo's Top Refill Deserts"}
           </h2>
+          {isFiltered && (
+            <span className="ml-1 text-xs font-mono text-text-muted bg-bg-elevated border border-border-subtle rounded px-1.5 py-0.5">
+              {displayWards.length} ward{displayWards.length !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
         <p className="text-text-muted text-xs leading-relaxed">
-          High plastic waste + low mymizu coverage = dark red
+          {isFiltered
+            ? 'Ranked by severity · zoom out to see all 23'
+            : 'High plastic waste + low mymizu coverage = dark red'}
         </p>
       </div>
 
-      {/* Top 5 ward cards */}
+      {/* Ward cards */}
       <div className="flex-none px-4 py-4 space-y-2">
-        {top5.map((ward, i) => (
+        {displayWards.length === 0 ? (
+          <p className="text-text-muted text-xs text-center py-6">No wards in current view</p>
+        ) : displayWards.map((ward, i) => (
           <button
             key={ward.ward_name}
             onClick={() => onWardClick(ward.ward_name)}

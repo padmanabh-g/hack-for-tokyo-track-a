@@ -15,6 +15,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
   const [gapLoading, setGapLoading] = useState(false)
   const [briefs, setBriefs] = useState<Record<string, string>>({})
   const [briefLoading, setBriefLoading] = useState(false)
+  const [visibleWardNames, setVisibleWardNames] = useState<string[]>([])
 
   const handleWardClick = useCallback(async (wardName: string) => {
     if (wardName === selectedWard) return
@@ -110,6 +111,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
             selectedWard={selectedWard}
             gapLocations={gapLocations}
             onWardClick={handleWardClick}
+            onViewportChange={setVisibleWardNames}
           />
         </div>
 
@@ -132,6 +134,7 @@ export function MapView({ data }: { data: AnalysisResult }) {
               wardsGeoJSON={data.wards}
               stats={data.stats}
               onWardClick={handleWardClick}
+              visibleWardNames={visibleWardNames}
             />
           )}
         </aside>

@@ -13,6 +13,7 @@ interface MapProps {
   selectedWard: string | null
   gapLocations: GapLocation[]
   onWardClick: (wardName: string) => void
+  onViewportChange?: (visibleWardNames: string[]) => void
 }
 
 const CARTO_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
@@ -34,6 +35,7 @@ export function Map({
   selectedWard,
   gapLocations,
   onWardClick,
+  onViewportChange,
 }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
@@ -42,6 +44,8 @@ export function Map({
   const hoveredWardRef = useRef<string | null>(null)
   const onWardClickRef = useRef(onWardClick)
   onWardClickRef.current = onWardClick
+  const onViewportChangeRef = useRef(onViewportChange)
+  onViewportChangeRef.current = onViewportChange
 
   // Initialize map
   useEffect(() => {
@@ -220,6 +224,23 @@ export function Map({
             'circle-stroke-opacity': 0.4,
           },
         })
+
+        // ── Viewport change: emit visible ward names on move/zoom ──
+        const emitVisibleWards = () => {
+          if (!onViewportChangeRef.current) return
+          const features = mapInstance.queryRenderedFeatures(undefined, { layers: ['ward-fill'] })
+          const names = [...new Set(
+            features
+              .map(f => f.properties?.ward_name as string)
+              .filter(Boolean)
+          )]
+          onViewportChangeRef.current(names)
+        }
+
+        mapInstance.on('moveend', emitVisibleWards)
+        mapInstance.on('zoomend', emitVisibleWards)
+        // Emit once after initial render so panel starts in sync
+        setTimeout(emitVisibleWards, 300)
 
         // ── Event handlers ──
 
